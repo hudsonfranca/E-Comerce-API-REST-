@@ -1,7 +1,7 @@
 
 
 module.exports = (sequelize,DataTypes)=>{
-    const Address = sequelize.define("Address",{
+    const Addresses = sequelize.define("Addresses",{
         street_address:{
             type:DataTypes.STRING,
             allowNull: false,
@@ -53,13 +53,13 @@ module.exports = (sequelize,DataTypes)=>{
           }
     })
 
-    Address.associate = function(models) {
-        Address.belongsTo(models.Customers,{foreignKey:'id_customers',as:'customers'})
+    Addresses.associate = function(models) {
+        Addresses.belongsTo(models.Customers,{foreignKey:'id_customers',as:'customers'})
     }
     
 
 
-    return Address;
+    return Addresses;
 }
 
 

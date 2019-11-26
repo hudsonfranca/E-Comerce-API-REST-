@@ -3,7 +3,7 @@ const request = require('supertest');
 const app = require('../../src/app');
 const factory = require('../factories');
 const faker = require('faker');
-const {Customer} = require('../../src/app/models');
+const {Customers} = require('../../src/app/models');
 
 describe('Customer Endpoints',()=>{
 
@@ -35,9 +35,30 @@ describe('Customer Endpoints',()=>{
 
         const response = await request(app)
         .get('/api/customer')
-        
 
-       // console.log({testeRoutes:response.body})
+        expect(response.status).toBe(200)
+
+    })
+    
+    it('Should update a Customer',async()=>{
+
+        const customer = await Customers.create({
+            first_name:"Hudson",
+            last_name:"França",
+            email_address:"hudson2@gmail.com",
+            password:"123456",
+            cpf:"12345678912",
+            phone_number:"12345678910"
+        })
+
+
+
+        const response = await request(app)
+        .put(`/api/customer/${customer.id}/edit`).send({
+            first_name:"mike",
+            last_name:"santos",
+            email_address:"mike@gmail.com",
+        })
 
         expect(response.status).toBe(200)
 

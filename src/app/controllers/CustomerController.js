@@ -1,4 +1,4 @@
-const {Customer} = require('../models')
+const {Customers} = require('../models')
 const db = require('../models')
 
 
@@ -13,7 +13,7 @@ module.exports = {
 
     const {first_name,last_name,email_address,cpf,phone_number,password} = req.body;
     
-    const email = await Customer.findOne({
+    const email = await Customers.findOne({
         where:{email_address}
     })
 
@@ -22,7 +22,7 @@ module.exports = {
         return 
     }
 
-    const customerCpf = await Customer.findOne({
+    const customerCpf = await Customers.findOne({
         where:{cpf}
     })
 
@@ -37,7 +37,7 @@ module.exports = {
 
         const response  =  await db.sequelize.transaction(async(t)=>{
 
-            const customer = await Customer.create({
+            const customer = await Customers.create({
                 first_name,last_name,email_address,cpf,phone_number,password
             },{transaction:t})
 
@@ -53,5 +53,13 @@ module.exports = {
     
 
        
-    }
+    },
+
+    async update(req,res){
+
+        
+
+        return res.status(200).send()
+    },
+    
 }

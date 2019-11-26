@@ -21,5 +21,7 @@ class AppController{
     }
 }
 
+//git remote add origin https://github.com/hudsonfranca/E-comerce-API.git
+//git push -u origin master
 
 module.exports = new AppController().express;

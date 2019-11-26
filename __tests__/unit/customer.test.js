@@ -1,7 +1,7 @@
 const truncate = require('../utils/truncate');
 const factory = require('../factories');
 const bcrypt = require("bcrypt");
-const {Customer} = require('../../src/app/models');
+const {Customers} = require('../../src/app/models');
 
 describe('Customer',()=>{
 
@@ -12,7 +12,7 @@ describe('Customer',()=>{
    
    
     it('Should encript user password',async()=>{
-        const customer = await Customer.create({
+        const customer = await Customers.create({
             first_name:"Hudson",
             last_name:"França",
             email_address:"hudson@gmail.com",
