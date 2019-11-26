@@ -1,7 +1,7 @@
 const truncate = require('../utils/truncate');
 const factory = require('../factories');
 const bcrypt = require("bcrypt");
-const {Customers} = require('../../src/app/models');
+const {customers} = require('../../src/app/models');
 
 describe('Customer',()=>{
 
@@ -12,7 +12,7 @@ describe('Customer',()=>{
    
    
     it('Should encript user password',async()=>{
-        const customer = await Customers.create({
+        const createdCustomer = await customers.create({
             first_name:"Hudson",
             last_name:"França",
             email_address:"hudson@gmail.com",
@@ -23,7 +23,7 @@ describe('Customer',()=>{
 
         // console.log({testeEncript:customer.dataValues})
  
-        const compareHash = await bcrypt.compare('123456',customer.password);
+        const compareHash = await bcrypt.compare('123456',createdCustomer.password);
  
         expect(compareHash).toBe(true);
      })

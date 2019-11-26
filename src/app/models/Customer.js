@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 
 module.exports = (sequelize,DataTypes)=>{
-    const Customers = sequelize.define("Customers",{
+    const customers = sequelize.define("customers",{
         
         first_name:{
             type:DataTypes.STRING,
@@ -74,11 +74,11 @@ module.exports = (sequelize,DataTypes)=>{
         }
     })
 
-    Customers.associate = function(models) {
-        Customers.hasMany(models.Addresses,{foreignKey:'id_customers',as:'addresses'})
+    customers.associate = function(models) {
+        customers.hasMany(models.addresses,{foreignKey:'id_customers',as:'addresses'})
 
-        Customers.hasOne(models.Carts,{foreignKey:'id_customers',as:'carts'})
+        customers.hasOne(models.carts,{foreignKey:'id_customers',as:'carts'})
     }
 
-    return Customers;
+    return customers;
 }

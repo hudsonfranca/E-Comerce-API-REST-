@@ -3,7 +3,7 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
    
-      return queryInterface.createTable('Products_Categories', { 
+      return queryInterface.createTable('products_categories', { 
         id:{
           type:Sequelize.INTEGER,
            primaryKey:true,
@@ -14,14 +14,14 @@ module.exports = {
         id_categorie:{
           type:Sequelize.INTEGER,
            allowNull:false,
-           references:{model:'Categories',key:'id'},
+           references:{model:'categories',key:'id'},
            onUpdate:'CASCADE',
            onDelete:'CASCADE'
         },
         id_product:{
           type:Sequelize.INTEGER,
            allowNull:false,
-           references:{model:'Products',key:'id'},
+           references:{model:'products',key:'id'},
            onUpdate:'CASCADE',
            onDelete:'CASCADE'
         },
@@ -41,7 +41,7 @@ module.exports = {
 
   down: (queryInterface, Sequelize) => {
     
-      return queryInterface.dropTable('Products_Categories');
+      return queryInterface.dropTable('products_categories');
     
   }
 };

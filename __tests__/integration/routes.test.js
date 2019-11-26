@@ -3,7 +3,7 @@ const request = require('supertest');
 const app = require('../../src/app');
 const factory = require('../factories');
 const faker = require('faker');
-const {Customers} = require('../../src/app/models');
+const {customers} = require('../../src/app/models');
 
 describe('Customer Endpoints',()=>{
 
@@ -42,7 +42,7 @@ describe('Customer Endpoints',()=>{
     
     it('Should update a Customer',async()=>{
 
-        const customer = await Customers.create({
+        const createdCustomer = await customers.create({
             first_name:"Hudson",
             last_name:"França",
             email_address:"hudson2@gmail.com",
@@ -54,7 +54,7 @@ describe('Customer Endpoints',()=>{
 
 
         const response = await request(app)
-        .put(`/api/customer/${customer.id}/edit`).send({
+        .put(`/api/customer/${createdCustomer.id}/edit`).send({
             first_name:"mike",
             last_name:"santos",
             email_address:"mike@gmail.com",

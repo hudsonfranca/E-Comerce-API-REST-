@@ -1,6 +1,6 @@
 
 module.exports = (sequelize,DataTypes)=>{
-    const Sales_Historys = sequelize.define("Sales_Historys",{
+    const sales_historys = sequelize.define("sales_historys",{
         amount:{
             type:DataTypes.DECIMAL,
             allowNull: false,
@@ -10,11 +10,11 @@ module.exports = (sequelize,DataTypes)=>{
         }
     })
 
-    Sales_Historys.associate = function(models) {
-        Sales_Historys.belongsToMany(models.Products,{ foreignKey:'id_sales_history', through:'sales_history_products', as:'products' });
+    sales_historys.associate = function(models) {
+        sales_historys.belongsToMany(models.products,{ foreignKey:'id_sales_history', through:'sales_history_products', as:'products' });
 
-        Sales_Historys.belongsTo(models.Payment_Methods,{foreignKey:'id_payment_methods',as:'payment_method'});
+        sales_historys.belongsTo(models.payment_methods,{foreignKey:'id_payment_methods',as:'payment_method'});
     }
 
-    return Sales_Historys;
+    return sales_historys;
 }

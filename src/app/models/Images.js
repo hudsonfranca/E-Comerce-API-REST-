@@ -1,6 +1,6 @@
 
 module.exports = (sequelize,DataTypes)=>{
-    const Images = sequelize.define("Images",{
+    const images = sequelize.define("images",{
         url:{
             type:DataTypes.STRING,
             allowNull: false,
@@ -12,9 +12,9 @@ module.exports = (sequelize,DataTypes)=>{
                }
         } 
     })
-    Images.associate = function(models) {
-       Images.belongsTo(models.Products,{foreignKey:'id_product',as:'products'});
+    images.associate = function(models) {
+       images.belongsTo(models.products,{foreignKey:'id_product',as:'products'});
     }
 
-return Images;
+return images;
 }

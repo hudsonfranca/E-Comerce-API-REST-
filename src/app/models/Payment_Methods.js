@@ -1,6 +1,6 @@
 
 module.exports = (sequelize,DataTypes)=>{
-    const Payment_Methods = sequelize.define("Payment_Methods",{
+    const payment_methods = sequelize.define("payment_methods",{
         name:{
             type:DataTypes.STRING,
             allowNull: false,
@@ -17,9 +17,9 @@ module.exports = (sequelize,DataTypes)=>{
         }
     })
 
-    Payment_Methods.associate = function(models) {
-        Payment_Methods.hasMany(models.Sales_Historys,{foreignKey:'id_payment_methods',as:'sales_historys'});
+    payment_methods.associate = function(models) {
+        payment_methods.hasMany(models.sales_historys,{foreignKey:'id_payment_methods',as:'sales_historys'});
     }
 
-return Payment_Methods;
+return payment_methods;
 }

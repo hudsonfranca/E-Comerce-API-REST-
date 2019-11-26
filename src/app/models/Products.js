@@ -1,6 +1,6 @@
 
 module.exports = (sequelize,DataTypes)=>{
-    const Products= sequelize.define("Products",{
+    const products= sequelize.define("products",{
 
         name:{
             type:DataTypes.STRING,
@@ -38,17 +38,17 @@ module.exports = (sequelize,DataTypes)=>{
 
         
     })
-    Products.associate = function(models) {
-        Products.belongsToMany(models.Sales_Historys,{foreignKey:'id_products', through:'sales_history_products',   as:'sales'});
+    products.associate = function(models) {
+        products.belongsToMany(models.sales_historys,{foreignKey:'id_products', through:'sales_history_products',   as:'sales'});
 
-        Products.belongsToMany(models.Categories,{foreignKey:'id_product',through:'products_categories',as:'categories'});
+        products.belongsToMany(models.categories,{foreignKey:'id_product',through:'products_categories',as:'categories'});
 
-        Products.belongsToMany(models.Carts,{foreignKey:'id_product',through:'cart_products',as:'carts'});
+        products.belongsToMany(models.carts,{foreignKey:'id_product',through:'cart_products',as:'carts'});
 
-        Products.hasMany(models.Images,{foreignKey:'id_product',as:'images'});
+        products.hasMany(models.images,{foreignKey:'id_product',as:'images'});
 
-        Products.hasOne(models.Stock,{foreignKey:'id_product',as:'stock'})
+        products.hasOne(models.stock,{foreignKey:'id_product',as:'stock'})
     }
 
-    return Products;
+    return products;
 }

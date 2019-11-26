@@ -1,6 +1,6 @@
 
 module.exports = (sequelize,DataTypes)=>{
-    const Categories = sequelize.define("Categories",{
+    const categories = sequelize.define("categories",{
         id: { 
             type: DataTypes.INTEGER,
             primaryKey: true,
@@ -17,9 +17,9 @@ module.exports = (sequelize,DataTypes)=>{
             }
     })
 
-    Categories.associate = function(models) {
-        Categories.belongsToMany(models.Products,{foreignKey:'id_categorie',through:'products_categories',as:'products'});
+    categories.associate = function(models) {
+        categories.belongsToMany(models.products,{foreignKey:'id_categorie',through:'products_categories',as:'products'});
     }
 
-return Categories;
+return categories;
 }

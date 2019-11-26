@@ -1,4 +1,4 @@
-const {Customers} = require('../models')
+const {customers} = require('../models')
 const db = require('../models')
 
 
@@ -6,23 +6,26 @@ module.exports = {
 
     async index(req,res){
 
-        return res.status(200).send()
+        const findAllCustomer = await customers.findAll({})
+    
+
+        return res.status(200).json(findAllCustomer);
     },
 
    async store(req,res){
 
     const {first_name,last_name,email_address,cpf,phone_number,password} = req.body;
     
-    const email = await Customers.findOne({
+    const findEmail = await customers.findOne({
         where:{email_address}
     })
 
-    if(email){
+    if(findEmail){
         res.status(400).json({error:"Choose another email."});
         return 
     }
 
-    const customerCpf = await Customers.findOne({
+    const customerCpf = await customers.findOne({
         where:{cpf}
     })
 
@@ -37,11 +40,11 @@ module.exports = {
 
         const response  =  await db.sequelize.transaction(async(t)=>{
 
-            const customer = await Customers.create({
+            const createdCustomer = await customers.create({
                 first_name,last_name,email_address,cpf,phone_number,password
             },{transaction:t})
 
-            return customer;
+            return createdCustomer;
         })
        
 

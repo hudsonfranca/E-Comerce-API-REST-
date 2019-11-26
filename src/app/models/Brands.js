@@ -1,5 +1,5 @@
 module.exports = (sequelize,DataTypes)=>{
-    const Brands = sequelize.define("Brands",{
+    const brands = sequelize.define("brands",{
 
         name:{
             type:DataTypes.STRING,
@@ -14,6 +14,6 @@ module.exports = (sequelize,DataTypes)=>{
         
     })
 
-    return Brands;
+    return brands;
 
 }
