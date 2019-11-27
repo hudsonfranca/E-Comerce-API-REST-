@@ -47,7 +47,9 @@ module.exports = (sequelize,DataTypes)=>{
 
         products.hasMany(models.images,{foreignKey:'id_product',as:'images'});
 
-        products.hasOne(models.stock,{foreignKey:'id_product',as:'stock'})
+        products.hasOne(models.stock,{foreignKey:'id_product',as:'stock'});
+
+        products.belongsTo(models.brands,{foreignKey:'brand_id',as:'brand'});
     }
 
     return products;

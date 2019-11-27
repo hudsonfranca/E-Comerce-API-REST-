@@ -22,13 +22,6 @@ module.exports = {
           onUpdate:'CASCADE',
           onDelete:'CASCADE'
         },
-        categorie_id:{
-          type:Sequelize.INTEGER,
-          allowNull:false,
-          references:{model:'categories',key:'id'},
-          onUpdate:'CASCADE',
-          onDelete:'CASCADE'
-        },
         description:{
           type:Sequelize.STRING(2000) ,
           allowNull:false,

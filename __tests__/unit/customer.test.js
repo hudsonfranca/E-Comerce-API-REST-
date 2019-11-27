@@ -1,5 +1,4 @@
 const truncate = require('../utils/truncate');
-const factory = require('../factories');
 const bcrypt = require("bcrypt");
 const {customers} = require('../../src/app/models');
 

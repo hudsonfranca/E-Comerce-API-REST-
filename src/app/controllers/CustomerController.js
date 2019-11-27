@@ -12,6 +12,15 @@ module.exports = {
         return res.status(200).json(findAllCustomer);
     },
 
+    
+    async show(req,res){
+
+        const findAllCustomer = await customers.findAll({})
+    
+
+        return res.status(200).json(findAllCustomer);
+    },
+
    async store(req,res){
 
     const {first_name,last_name,email_address,cpf,phone_number,password} = req.body;
