@@ -166,6 +166,36 @@ describe('Products Endpoints',()=>{
 
     })
 
+    it('should display a list of products by categorie',async()=>{
+
+        const brandCreated = await brands.create({
+            name:'Apple'
+        })
+
+        const categoriesCreated = await categories.create({
+            name:'Electronics'
+        })
+
+        await request(app).post(`/api/categorie/${categoriesCreated.id}/products`)
+        .send({
+            "name":"MacBook Pro",
+            "brand_id":brandCreated.id,
+            "description":"Processador - mais poder em seus núcleos ",
+            "price":8618.89,
+            "status":true
+        })
+
+        const response = await request(app)
+        .get(`/api/products?categorie_id=${categoriesCreated.id}`).send();
+
+        console.log(response)
+    
+
+        expect(response.status).toBe(200)
+
+    })
+
+
 
 
 
