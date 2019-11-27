@@ -41,7 +41,7 @@ module.exports = (sequelize,DataTypes)=>{
     products.associate = function(models) {
         products.belongsToMany(models.sales_historys,{foreignKey:'id_products', through:'sales_history_products',   as:'sales'});
 
-        products.belongsToMany(models.categories,{foreignKey:'id_product',through:'products_categories',as:'categories'});
+        products.belongsToMany(models.categories,{foreignKey:'id_product',through:'products_categories',as:'Categories'});
 
         products.belongsToMany(models.carts,{foreignKey:'id_product',through:'cart_products',as:'carts'});
 

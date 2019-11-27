@@ -4,8 +4,22 @@ const {categories} = require('../models');
 const sequelize = require('../models').sequelize;
 
 module.exports = {
-    async store(req,res){
+    async index(req,res){
 
+        const {categorie_id} = req.query;
+
+        const findCategorie = await categories.findByPk(categorie_id,{
+            include:[{
+                model:products,
+                as:'Products'
+            }]
+        })
+        
+      return  res.status(200).json(await findCategorie.getProducts());
+
+
+    },
+    async store(req,res){
 
         const {name,brand_id,description,price,status} = req.body;
 

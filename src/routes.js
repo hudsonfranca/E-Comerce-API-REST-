@@ -13,6 +13,7 @@ routes.put('/api/customer/:id/edit',CustomerController.update);
 routes.post('/api/categorie/:categorie_id/products',ProductController.store);
  routes.delete('/api/products/:id',ProductController.delete);
  routes.put('/api/products/:id/edit',ProductController.update);
+ routes.get('/api/products',ProductController.index);
 
 
 
