@@ -1,27 +1,58 @@
 const {products} = require('../models');
 const {brands} = require('../models');
 const {categories} = require('../models');
+const {images} = require('../models');
 const sequelize = require('../models').sequelize;
 
 module.exports = {
     async index(req,res){
 
-        const {categorie_id} = req.query;
+         const {categorie_id} = req.query;
 
-        const findCategorie = await categories.findByPk(categorie_id,{
-            include:[{
-                model:products,
-                as:'Products'
-            }]
-        })
+         try{
+
+            const response  =  await sequelize.transaction(async(t)=>{
+
+                const findCategorie = await categories.findByPk(categorie_id,{
+                    attributes:['name'],
+                    include:[{
+                       association:'Products',
+                       attributes:['id','name','brand_id','description','price','status'],
+                       include:[{ association:'Images', attributes:['id','url','id_product'],}],
+                       through: { 
+                        attributes: []
+                      }
+                      
+                    },]
+                })
+
+                return findCategorie;
         
-      return  res.status(200).json(await findCategorie.getProducts());
+            })
+
+            if(!response){
+                res.status(400).json({error:"This categorie not exists"})
+                return
+            }
+
+            return res.status(200).json(response)
+
+
+         }catch(err){
+
+         }
+
+       
+        
+      return  res.status(200).json(findCategorie);
 
 
     },
     async store(req,res){
 
-        const {name,brand_id,description,price,status} = req.body;
+        const {name,brand_id,description,price,status,url_images} = req.body;
+
+        console.log(req.body)
 
         const findBrand = await brands.findByPk(brand_id);
         const findCategorie = await categories.findByPk(req.params.categorie_id);
@@ -48,6 +79,16 @@ module.exports = {
                 },{transaction:t})
 
                 await productCreated.addCategories(findCategorie,{transaction:t});
+
+                if(productCreated){
+                    let imgs = [];
+
+                    url_images.map((url)=>{
+                        imgs.push({url:url,id_product:productCreated.id})
+                    })
+
+                    await images.bulkCreate(imgs,{ transaction: t })
+                }
 
                 return productCreated;
 

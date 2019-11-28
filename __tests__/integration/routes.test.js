@@ -93,10 +93,11 @@ describe('Products Endpoints',()=>{
             "brand_id":brandCreated.id,
             "description":"Processador - mais poder em seus núcleos ",
             "price":8618.89,
-            "status":true
+            "status":true,
+            "url_images":["c://imagem10","c://imagem11","c://imagem12"]
         })
          
-       console.log(response.text)
+      
 
         expect(response.status).toBe(201)
 
@@ -119,7 +120,8 @@ describe('Products Endpoints',()=>{
             "brand_id":brandCreated.id,
             "description":"Processador - mais poder em seus núcleos ",
             "price":8618.89,
-            "status":true
+            "status":true,
+            "url_images":["c://imagem10","c://imagem11","c://imagem12"]
         })
 
         const response = await request(app)
@@ -147,7 +149,8 @@ describe('Products Endpoints',()=>{
             "brand_id":brandCreated.id,
             "description":"Processador - mais poder em seus núcleos ",
             "price":8618.89,
-            "status":true
+            "status":true,
+            "url_images":["c://imagem10","c://imagem11","c://imagem12"]
         })
 
         const response = await request(app)
@@ -188,7 +191,7 @@ describe('Products Endpoints',()=>{
         const response = await request(app)
         .get(`/api/products?categorie_id=${categoriesCreated.id}`).send();
 
-        console.log(response)
+        
     
 
         expect(response.status).toBe(200)
