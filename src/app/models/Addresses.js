@@ -27,7 +27,7 @@ module.exports = (sequelize,DataTypes)=>{
             
             validate:{
                 notNull: true, 
-                len: [1,20],
+                len: [5,10],
                 notEmpty: true,
                }
           },

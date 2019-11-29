@@ -12,8 +12,11 @@ module.exports = {
          try{
 
             const response  =  await sequelize.transaction(async(t)=>{
+                
+                // display a list of products by categorie
 
                 const findCategorie = await categories.findByPk(categorie_id,{
+                    transaction:t,
                     attributes:['name'],
                     include:[{
                        association:'Products',
@@ -39,12 +42,11 @@ module.exports = {
 
 
          }catch(err){
-
+            res.status(400).json({error:"Unable to display a list of products by categorie."});
+            console.log(err);
+            return
          }
 
-       
-        
-      return  res.status(200).json(findCategorie);
 
 
     },
@@ -52,7 +54,7 @@ module.exports = {
 
         const {name,brand_id,description,price,status,url_images} = req.body;
 
-        console.log(req.body)
+        
 
         const findBrand = await brands.findByPk(brand_id);
         const findCategorie = await categories.findByPk(req.params.categorie_id);
@@ -80,6 +82,7 @@ module.exports = {
 
                 await productCreated.addCategories(findCategorie,{transaction:t});
 
+                //add urls to images
                 if(productCreated){
                     let imgs = [];
 
@@ -120,7 +123,8 @@ module.exports = {
             const response  =  await sequelize.transaction(async(t)=>{
 
                 await products.destroy({
-                    where: { id }
+                    where: { id },
+                    transaction:t
                   });
 
             })
@@ -154,7 +158,8 @@ module.exports = {
             const response  =  await sequelize.transaction(async(t)=>{
 
             const updatedProduct = await products.update(req.body,{
-                    where: { id }
+                    where: { id },
+                    transaction:t
                   });
 
                   return updatedProduct;

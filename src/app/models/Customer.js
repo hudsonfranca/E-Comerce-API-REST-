@@ -75,7 +75,7 @@ module.exports = (sequelize,DataTypes)=>{
     })
 
     customers.associate = function(models) {
-        customers.hasMany(models.addresses,{foreignKey:'id_customers',as:'addresses'})
+        customers.hasMany(models.addresses,{foreignKey:'id_customers',as:'Addresses'})
 
         customers.hasOne(models.carts,{foreignKey:'id_customers',as:'carts'})
     }
