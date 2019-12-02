@@ -7,42 +7,28 @@ const sequelize = require('../models').sequelize;
 module.exports = {
     async index(req,res){
 
-         const {categorie_id} = req.query;
+       
 
          try{
 
             const response  =  await sequelize.transaction(async(t)=>{
                 
-                // display a list of products by categorie
-
-                const findCategorie = await categories.findByPk(categorie_id,{
-                    transaction:t,
-                    attributes:['name'],
-                    include:[{
-                       association:'Products',
-                       attributes:['id','name','brand_id','description','price','status'],
-                       include:[{ association:'Images', attributes:['id','url','id_product'],}],
-                       through: { 
-                        attributes: []
-                      }
-                      
-                    },]
+                
+                const allProducts = await products.findAll({
+                    attributes:["id","name","description","price", "status"],
+                    include:[{association:'Images',attributes:["id","url","id_product"]}]
                 })
 
-                return findCategorie;
+                return allProducts;
         
             })
 
-            if(!response){
-                res.status(400).json({error:"This categorie not exists"})
-                return
-            }
 
             return res.status(200).json(response)
 
 
          }catch(err){
-            res.status(400).json({error:"Unable to display a list of products by categorie."});
+            res.status(400).json({error:"unable to return products."});
             console.log(err);
             return
          }
@@ -115,7 +101,7 @@ module.exports = {
         const findProduct = await products.findByPk(id);
 
         if(!findProduct){
-            res.status(400).json({error:"This product not exists"})
+            res.status(400).json({error:"This product does not exist"})
             return
         }
 
@@ -149,7 +135,7 @@ module.exports = {
         const findProduct = await products.findByPk(id);
 
         if(!findProduct){
-            res.status(400).json({error:"This product not exists"})
+            res.status(400).json({error:"This product does not exist"})
             return
         }
 
@@ -157,8 +143,9 @@ module.exports = {
      try{
             const response  =  await sequelize.transaction(async(t)=>{
 
-            const updatedProduct = await products.update(req.body,{
+            const [lines,updatedProduct] = await products.update(req.body,{
                     where: { id },
+                    returning: true,
                     transaction:t
                   });
 
@@ -167,10 +154,9 @@ module.exports = {
             })
 
             res.status(200).json(response);
-
             return
         }catch(err){
-            res.status(400).json({error:"Unable to delete this product."});
+            res.status(400).json({error:"Unable to update this product."});
             console.log(err);
             return
         }

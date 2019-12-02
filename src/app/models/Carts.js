@@ -9,7 +9,7 @@ module.exports = (sequelize,DataTypes)=>{
     })
 
     carts.associate = function(models) {
-        carts.belongsToMany(models.products,{foreignKey:'id_cart',through:'cart_products',as:'products'});
+        carts.belongsToMany(models.products,{foreignKey:'id_cart',through:'cart_products',as:'Products'});
         carts.belongsTo(models.customers,{foreignKey:'id_customers',as:'customers'});
     }
 

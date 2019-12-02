@@ -10,29 +10,33 @@ module.exports = {
         const {id} = req.params;
 
         try{
+
             const response  =  await sequelize.transaction(async(t)=>{
-                const findStockByproductId = await products.findByPk(id,{
-                    attributes:[],
-                    transaction:t,
-                    include:[{
-                        association:'Stock',
-                        attributes:["id","quantity","id_product"],
-                    }]
-                })
 
-                return findStockByproductId;
+                const findProduct = await products.findByPk(id,{ transaction:t});
+
+                if(!findProduct){
+                   res.status(400).json({error:"This product does not exist."});
+                   return
+                }
+        
+                const findStock = await findProduct.getStock({attributes:["id","quantity","id_product"], transaction:t})
+
+                return findStock;
+
+
             })
-       
-
-        res.status(200).json(response);
-        return ;
+    
+             return res.status(200).json(response);
 
         }catch(err){
-            res.status(400).json({error:"Unable to display this stock"});
-            console.log(err);
-            return
+
+            res.status(400).json({error:"Unable to return this stock"});
+                console.log(err);
+                return
+
         }
-        
+
         
     },
     async store(req,res){
@@ -43,7 +47,7 @@ module.exports = {
         const findProduct = await products.findByPk(id);
 
         if(!findProduct){
-            res.status(400).json({error:"This stock does not exist."});
+            res.status(400).json({error:"This product does not exist."});
             return
         }
 
@@ -112,7 +116,7 @@ module.exports = {
         try{
             const response  =  await sequelize.transaction(async(t)=>{
 
-            const [updatedLines,updatedStock] = await stock.update(req.body,{
+            const [lines,updatedStock] = await stock.update(req.body,{
                     where: { id },
                     returning: true,
                     transaction:t

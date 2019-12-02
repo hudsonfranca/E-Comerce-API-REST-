@@ -5,7 +5,9 @@ const faker = require('faker');
 const {customers} = require('../../src/app/models');
 const {brands} = require('../../src/app/models');
 const {categories} = require('../../src/app/models');
-const {addresses} = require('../../src/app/models')
+const {addresses} = require('../../src/app/models');
+const {products} = require('../../src/app/models');
+const {stock} = require('../../src/app/models')
 const factory = require("../factories");
 
 describe('Customer Endpoints',()=>{
@@ -34,6 +36,83 @@ describe('Customer Endpoints',()=>{
 
     })
 
+    it('Should not create a new customer if the email is already registered.',async()=>{
+
+        await customers.create({
+            first_name:"Hudson",
+            last_name:"França",
+            email_address:"hudson1@gmail.com",
+            password:"123456",
+            cpf:"12345678911",
+            phone_number:"12345678910"
+        })
+
+        const response = await request(app)
+        .post('/api/customer')
+        .send({
+            first_name:"Hudson",
+            last_name:"França",
+            email_address:"hudson1@gmail.com",
+            password:"123456",
+            cpf:"12345678911",
+            phone_number:"12345678910"
+        })
+
+       // console.log({testeRoutes:response.body})
+
+        expect(response.status).toBe(400)
+
+    })
+
+    it('Should not create a new customer if the cpf is already registered.',async()=>{
+
+        await customers.create({
+            first_name:"Hudson",
+            last_name:"França",
+            email_address:"hudso@gmail.com",
+            password:"123456",
+            cpf:"12345678911",
+            phone_number:"12345678910"
+        })
+
+        const response = await request(app)
+        .post('/api/customer')
+        .send({
+            first_name:"Hudson",
+            last_name:"França",
+            email_address:"hud@gmail.com",
+            password:"123456",
+            cpf:"12345678911",
+            phone_number:"12345678910"
+        })
+
+       // console.log({testeRoutes:response.body})
+
+        expect(response.status).toBe(400)
+
+    })
+
+    it('should not create a new customer with invalid data',async()=>{
+
+
+        const response = await request(app)
+        .post('/api/customer')
+        .send({
+            first_name:"Hudson",
+            last_name:"França",
+            email_address:"HUDS@gmail.com",
+            password:"123456",
+            cpf:"123456789111111",
+            phone_number:"12345678910"
+        })
+
+       // console.log({testeRoutes:response.body})
+
+        expect(response.status).toBe(400)
+
+    })
+
+
     it('Should return all customers.',async()=>{
 
         const response = await request(app)
@@ -48,9 +127,9 @@ describe('Customer Endpoints',()=>{
         const createdCustomer = await customers.create({
             first_name:"Hudson",
             last_name:"França",
-            email_address:"hudson2@gmail.com",
+            email_address:"hudso02@gmail.com",
             password:"123456",
-            cpf:"12345678912",
+            cpf:"12345608912",
             phone_number:"12345678910"
         })
 
@@ -66,6 +145,71 @@ describe('Customer Endpoints',()=>{
         expect(response.status).toBe(200)
 
     })
+
+    it('Should not update a customer that does not exist',async()=>{
+
+
+        const response = await request(app)
+        .put(`/api/customer/${null}/edit`).send()
+
+        expect(response.status).toBe(400)
+
+    })
+
+    it('should not update a customer with invalid data',async()=>{
+
+        const createdCustomer = await customers.create({
+            first_name:"Hudson",
+            last_name:"França",
+            email_address:"hudso0002@gmail.com",
+            password:"123456",
+            cpf:"12300008912",
+            phone_number:"12345678910"
+        })
+
+
+
+        const response = await request(app)
+        .put(`/api/customer/${createdCustomer.id}/edit`).send({
+            first_name:null,
+            last_name:"",
+            email_address:"mikegmail.com",
+        })
+
+        expect(response.status).toBe(400)
+
+    })
+
+    it('should delete a customer',async()=>{
+
+        const createdCustomer = await customers.create({
+            first_name:"Hudson",
+            last_name:"França",
+            email_address:"hudso0002@gmail.com",
+            password:"123456",
+            cpf:"12300008912",
+            phone_number:"12345678910"
+        })
+
+
+
+        const response = await request(app)
+        .delete(`/api/customer/${createdCustomer.id}`).send()
+
+        expect(response.status).toBe(200)
+
+    })
+
+    it('should not delete a customer that does not exist',async()=>{
+
+        const response = await request(app)
+        .delete(`/api/customer/${null}`).send()
+
+        expect(response.status).toBe(400)
+
+    })
+
+
     
 
 })
@@ -105,18 +249,39 @@ describe('Products Endpoints',()=>{
 
     })
 
-    it('Should delete a Product',async()=>{
+    it('should not create a new product with an invalid brand',async()=>{
 
-        const brandCreated = await brands.create({
-            name:'Apple'
-        })
 
         const categoriesCreated = await categories.create({
             name:'Electronics'
         })
 
-        const productCreated = await request(app)
+        const response = await request(app)
         .post(`/api/categorie/${categoriesCreated.id}/products`)
+        .send({
+            "name":"MacBook Pro",
+            "brand_id":null,
+            "description":"Processador - mais poder em seus núcleos ",
+            "price":8618.89,
+            "status":true,
+            "url_images":["c://imagem10","c://imagem11","c://imagem12"]
+        })
+         
+      
+
+        expect(response.status).toBe(400)
+
+    })
+
+    it('should not create a new product with an invalid categorie',async()=>{
+
+
+        const brandCreated = await brands.create({
+            name:'Apple'
+        })
+
+        const response = await request(app)
+        .post(`/api/categorie/${null}/products`)
         .send({
             "name":"MacBook Pro",
             "brand_id":brandCreated.id,
@@ -125,12 +290,43 @@ describe('Products Endpoints',()=>{
             "status":true,
             "url_images":["c://imagem10","c://imagem11","c://imagem12"]
         })
+         
+      
+
+        expect(response.status).toBe(400)
+
+    })
+
+
+    it('Should delete a Product',async()=>{
+
+        const brandCreated = await brands.create({
+            name:'Apple'
+        })
+
+        const productCreated = await products.create({
+            "name":"MacBook Pro",
+            "brand_id":brandCreated.id,
+            "description":"Processador - mais poder em seus núcleos ",
+            "price":8618.89,
+            "status":true,
+        })
 
         const response = await request(app)
-        .delete(`/api/products/${productCreated.body.id}`).send();
+        .delete(`/api/products/${productCreated.id}`).send();
     
 
         expect(response.status).toBe(200)
+
+    })
+
+    it('Should not delete a product that does not exist',async()=>{
+
+        const response = await request(app)
+        .delete(`/api/products/${null}`).send();
+    
+
+        expect(response.status).toBe(400)
 
     })
 
@@ -140,23 +336,18 @@ describe('Products Endpoints',()=>{
             name:'Apple'
         })
 
-        const categoriesCreated = await categories.create({
-            name:'Electronics'
-        })
-
-        const productCreated = await request(app)
-        .post(`/api/categorie/${categoriesCreated.id}/products`)
-        .send({
+       const productCreated = await products.create(
+        {
             "name":"MacBook Pro",
             "brand_id":brandCreated.id,
             "description":"Processador - mais poder em seus núcleos ",
             "price":8618.89,
-            "status":true,
-            "url_images":["c://imagem10","c://imagem11","c://imagem12"]
-        })
+            "status":true
+        }
+       )
 
         const response = await request(app)
-        .put(`/api/products/${productCreated.body.id}/edit`).send({
+        .put(`/api/products/${productCreated.id}/edit`).send({
             
                 "name":"MacBook Air",
                 "brand_id":brandCreated.id,
@@ -171,7 +362,17 @@ describe('Products Endpoints',()=>{
 
     })
 
-    it('should display a list of products by categorie',async()=>{
+    it('Should not update a product that does not exist',async()=>{
+
+        const response = await request(app)
+        .put(`/api/products/${null}/edit`).send();
+    
+
+        expect(response.status).toBe(400)
+
+    })
+
+    it('should not update a product with invalid data',async()=>{
 
         const brandCreated = await brands.create({
             name:'Apple'
@@ -181,21 +382,35 @@ describe('Products Endpoints',()=>{
             name:'Electronics'
         })
 
-        await request(app).post(`/api/categorie/${categoriesCreated.id}/products`)
-        .send({
+        const productCreated = await products.create({
             "name":"MacBook Pro",
             "brand_id":brandCreated.id,
             "description":"Processador - mais poder em seus núcleos ",
             "price":8618.89,
-            "status":true
-            
+            "status":true,
         })
 
         const response = await request(app)
-        .get(`/api/products?categorie_id=${categoriesCreated.id}`).send();
-
-        
+        .put(`/api/products/${productCreated.id}/edit`).send({
+            
+                "name":null,
+                "brand_id":brandCreated.id,
+                "description":"Processador - mais poder em seus núcleos ",
+                "price":5000.00,
+                "status":false
+            
+        });
     
+
+        expect(response.status).toBe(400)
+
+    })
+
+
+    it('should return a list of products by categorie',async()=>{
+
+        const response = await request(app).get(`/api/products`)
+        .send()
 
         expect(response.status).toBe(200)
 
@@ -203,7 +418,12 @@ describe('Products Endpoints',()=>{
 
 })
 
+
+
+
+
 describe('Addresses Endpoints',()=>{
+
     it('Should create a new address',async()=>{
 
         const createdCustomer = await customers.create({
@@ -229,8 +449,43 @@ describe('Addresses Endpoints',()=>{
 
     })
 
+    it('should not create an address without a valid customer',async()=>{
 
-    it('should display a list of addresses by customer.',async()=>{
+        const response = await request(app)
+        .post(`/api/customer/${null}/addresses`).send();
+
+        expect(response.status).toBe(400)
+
+
+    })
+
+    it('Should not create an address with invalid data',async()=>{
+
+        const createdCustomer = await customers.create({
+            first_name:"Hudson",
+            last_name:"França",
+            email_address:"j@gmail.com",
+            password:"123456",
+            cpf:"12300078902",
+            phone_number:"12345678910"
+        })
+
+        const response = await request(app)
+        .post(`/api/customer/${createdCustomer.id}/addresses`).send({
+            street_address:null,
+            city:null,
+            zip:"12345",
+            country:"Brasil",
+            state:"ES"
+        });
+
+        expect(response.status).toBe(400)
+
+
+    })
+
+
+    it('should return a list of addresses by customer.',async()=>{
 
 
         const createdCustomer = await customers.create({
@@ -261,6 +516,16 @@ describe('Addresses Endpoints',()=>{
 
     })
 
+    it('Should not return an address list without a valid customer',async()=>{
+
+        const response = await request(app)
+        .get(`/api/customer/${null}/addresses`).send();
+
+        expect(response.status).toBe(400)
+
+
+    })
+
     it('Should delete a address.',async()=>{
 
         
@@ -285,10 +550,21 @@ describe('Addresses Endpoints',()=>{
         const response = await request(app)
         .delete(`/api/addresses/${addressCreated.id}`).send();
 
-        console.log(response.error)
+        
     
 
         expect(response.status).toBe(200)
+
+    })
+
+    it('Should not delete an address that does not exist.',async()=>{
+
+      
+        const response = await request(app)
+        .delete(`/api/addresses/${null}`).send();
+    
+
+        expect(response.status).toBe(400)
 
     })
 
@@ -319,15 +595,61 @@ describe('Addresses Endpoints',()=>{
             city:"Rio Bananal",
         });
 
-        console.log(response.error)
+       
     
 
         expect(response.status).toBe(200)
 
     })
+
+    it('Should not update an address with invalid data.',async()=>{
+
+        
+        const createdCustomer = await customers.create({
+            first_name:"Hudson",
+            last_name:"França",
+            email_address:"j11@gmail.com",
+            password:"123456",
+            cpf:"12305911000",
+            phone_number:"12345678910"
+        })
+
+      const addressCreated = await addresses.create({
+        street_address:"rua",
+        city:"Linhres",
+        zip:"12345",
+        country:"Brasil",
+        state:"ES",
+        id_customers:createdCustomer.id
+      })
+      
+        const response = await request(app)
+        .put(`/api/addresses/${addressCreated.id}/edit`).send({
+            street_address:null,
+            city:"",
+        });
+    
+
+        expect(response.status).toBe(400)
+
+    })
+
+    it('should not update an address that does not exist',async()=>{
+
+      
+        const response = await request(app)
+        .put(`/api/addresses/${null}/edit`).send();
+
+        console.log(response.error)
+    
+
+        expect(response.status).toBe(400)
+
+    })
 })
 
 describe('Brands Endpoints',()=>{
+
     it('Should create a new brand',async()=>{
 
     
@@ -337,6 +659,19 @@ describe('Brands Endpoints',()=>{
         });
 
         expect(response.status).toBe(201)
+
+
+    })
+
+    it('Should not create a brand with invalid data',async()=>{
+
+    
+        const response = await request(app)
+        .post(`/api/brands`).send({
+            name:null
+        });
+
+        expect(response.status).toBe(400)
 
 
     })
@@ -368,6 +703,15 @@ describe('Brands Endpoints',()=>{
 
     })
 
+    it('should not delete a brand that does not exist',async()=>{
+
+        const response = await request(app)
+        .delete(`/api/brands/${null}`).send();
+
+        expect(response.status).toBe(400)
+
+    })
+
     it('Should update a brand.',async()=>{
 
         
@@ -381,6 +725,34 @@ describe('Brands Endpoints',()=>{
         });
 
         expect(response.status).toBe(200)
+       
+
+    })
+
+    it('Should not update a brand that does not exist',async()=>{
+
+        const response = await request(app)
+        .put(`/api/brands/${null}/edit`).send({
+            name:"Acer"
+        });
+
+        expect(response.status).toBe(400)
+
+    })
+
+    it('Should not update a brand with invalid data.',async()=>{
+
+        
+        const brandCreated = await brands.create({
+            name:"Apple"
+        });
+
+        const response = await request(app)
+        .put(`/api/brands/${brandCreated.id}/edit`).send({
+            name:""
+        });
+
+        expect(response.status).toBe(400)
        
 
     })
@@ -398,6 +770,19 @@ describe('Categories Endpoints',()=>{
         });
 
         expect(response.status).toBe(201)
+
+
+    })
+
+    it('should not create a category with invalid data',async()=>{
+
+    
+        const response = await request(app)
+        .post(`/api/categories`).send({
+            name:""
+        });
+
+        expect(response.status).toBe(400)
 
 
     })
@@ -429,6 +814,16 @@ describe('Categories Endpoints',()=>{
 
     })
 
+    it('Should not delete a category that does not exist.',async()=>{
+
+
+        const response = await request(app)
+        .delete(`/api/categories/${null}`).send();
+
+        expect(response.status).toBe(400)
+
+    })
+
     it('Should update a categorie.',async()=>{
 
         
@@ -445,5 +840,262 @@ describe('Categories Endpoints',()=>{
        
 
     })
+
+    it('Should not update a category that does not exist.',async()=>{
+
+        const response = await request(app)
+        .put(`/api/categories/${null}/edit`).send({
+            name:"Acer"
+        });
+
+        expect(response.status).toBe(400)
+       
+
+    })
+
+    it('Should not update a category with invalid data.',async()=>{
+
+        
+        const categorieCreated = await categories.create({
+            name:"Apple"
+        });
+
+        const response = await request(app)
+        .put(`/api/categories/${categorieCreated.id}/edit`).send({
+            name:null
+        });
+
+        expect(response.status).toBe(400)
+       
+
+    })
 })
+
+
+
+describe('Stock Endpoints',()=>{
+
+    it('Should create a new stock',async()=>{
+
+        const brandCreated = await brands.create({
+            name:"Apple"
+        });
+    
+
+        const productCreated = await products.create({
+            "name":"Ventilador",
+            "brand_id":brandCreated.id,
+            "description":"Processador - mais poder em seus núcleos Com um processador",
+            "price":987,
+            "status":true,
+        });
+
+        const response = await request(app)
+        .post(`/api/product/${productCreated.id}/stock`).send({
+            quantity:456
+        });
+
+       
+
+        expect(response.status).toBe(201)
+
+
+    })
+
+    it('should not create stock without a product.',async()=>{
+
+
+        const response = await request(app)
+        .post(`/api/product/${null}/stock`).send({
+            quantity:456
+        });
+
+
+        expect(response.status).toBe(400)
+
+
+    })
+
+    it('Should not create a stock with invalid data.',async()=>{
+
+        const brandCreated = await brands.create({
+            name:"Apple"
+        });
+    
+
+        const productCreated = await products.create({
+            "name":"Ventilador",
+            "brand_id":brandCreated.id,
+            "description":"Processador - mais poder em seus núcleos Com um processador",
+            "price":987,
+            "status":true,
+        });
+
+        const response = await request(app)
+        .post(`/api/product/${productCreated.id}/stock`).send({
+            quantity:null
+        });
+
+       
+
+        expect(response.status).toBe(400)
+
+
+    })
+
+
+    it('should return the stock of each product',async()=>{
+
+        const brandCreated = await brands.create({
+            name:"Apple"
+        });
+        
+
+        
+        const productCreated = await products.create({
+            "name":"Ventilador",
+            "brand_id":brandCreated.id,
+            "description":"Processador - mais poder em seus núcleos Com um processador",
+            "price":987,
+            "status":true,
+        });
+
+        const stockCreated = await stock.create({
+            id_product:productCreated.id,
+            quantity:678
+
+        })
+
+        const response = await request(app)
+        .get(`/api/product/${productCreated.id}/stock`).send();
+
+        expect(response.status).toBe(200)
+      
+
+    })
+
+    it('should not return stock of an invalid product',async()=>{
+
+
+        const response = await request(app)
+        .get(`/api/product/${null}/stock`).send();
+
+        expect(response.status).toBe(400)
+      
+
+    })
+
+    it('Should delete a stock.',async()=>{
+        const brandCreated = await brands.create({
+            name:"Apple"
+        });
+        
+
+        const productCreated = await products.create({
+            "name":"Ventilador",
+            "brand_id":brandCreated.id,
+            "description":"Processador - mais poder em seus núcleos Com um processador",
+            "price":987,
+            "status":true,
+        });
+
+        const stockCreated = await stock.create({
+            id_product:productCreated.id,
+            quantity:678
+
+        })
+
+        const response = await request(app)
+        .delete(`/api/stock/${stockCreated.id}`).send();
+
+        expect(response.status).toBe(200)
+
+    })
+
+    it('Should not delete a stock that does not exist.',async()=>{
+
+        const response = await request(app)
+        .delete(`/api/stock/${null}`).send();
+
+        expect(response.status).toBe(400)
+
+    })
+
+    it('Should update a stock.',async()=>{
+
+        const brandCreated = await brands.create({
+            name:"Apple"
+        });
+       
+
+        const productCreated = await products.create({
+            "name":"Ventilador",
+            "brand_id":brandCreated.id,
+            "description":"Processador - mais poder em seus núcleos Com um processador",
+            "price":987,
+            "status":true,
+        });
+
+        const stockCreated = await stock.create({
+            id_product:productCreated.id,
+            quantity:678
+
+        })
+
+        const response = await request(app)
+        .put(`/api/stock/${stockCreated.id}/edit`).send({
+            quantity:90
+        });
+
+        expect(response.status).toBe(200)
+       
+
+    })
+
+    it('Should not update stock that does not exist.',async()=>{
+
+
+        const response = await request(app)
+        .put(`/api/stock/${null}/edit`).send({
+            quantity:90
+        });
+
+        expect(response.status).toBe(400)
+       
+
+    })
+
+    it('Should not update a stock with invalid data.',async()=>{
+
+        const brandCreated = await brands.create({
+            name:"Apple"
+        });
+       
+
+        const productCreated = await products.create({
+            "name":"Ventilador",
+            "brand_id":brandCreated.id,
+            "description":"Processador - mais poder em seus núcleos Com um processador",
+            "price":987,
+            "status":true,
+        });
+
+        const stockCreated = await stock.create({
+            id_product:productCreated.id,
+            quantity:678
+
+        })
+
+        const response = await request(app)
+        .put(`/api/stock/${stockCreated.id}/edit`).send({
+            quantity:null
+        });
+
+        expect(response.status).toBe(400)
+       
+
+    })
+})
+
+
 

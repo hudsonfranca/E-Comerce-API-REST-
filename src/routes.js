@@ -5,12 +5,15 @@ const AddressesController = require('./app/controllers/AddressesController');
 const BrandController = require('./app/controllers/BrandController');
 const CategorieController = require('./app/controllers/CategorieController');
 const StockController = require('./app/controllers/StockController');
-
+const CartController = require('./app/controllers/CartController');
+const SessionController = require('./app/controllers/SessionController');
+const authMiddleware = require('./app/middleware/auth')
 
 
 //...............CUSTOMERS ROUTES..............................
 routes.post('/api/customer',CustomerController.store);
 routes.get('/api/customer',CustomerController.index);
+routes.delete('/api/customer/:id',CustomerController.delete);
 routes.put('/api/customer/:id/edit',CustomerController.update);
 
 //...............PRODUCTS ROUTES..............................
@@ -44,6 +47,23 @@ routes.post('/api/categorie/:categorie_id/products',ProductController.store);
  routes.get('/api/product/:id/stock',StockController.index);
  routes.delete('/api/stock/:id',StockController.delete);
  routes.put('/api/stock/:id/edit',StockController.update);
+
+ 
+
+
+ //................SESSION..................................
+ routes.post('/api/sessions',SessionController.store)
+
+
+//................AUTH MIDDLEWARE..................................
+routes.use(authMiddleware)
+
+ 
+ //...............CART ROUTES..............................
+ routes.post('/api/product/:id/cart',CartController.store);
+ routes.get('/api/cart',CartController.index);
+ routes.delete('/api/product/:id',CartController.delete);
+ 
 
 
 

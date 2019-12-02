@@ -94,7 +94,7 @@ module.exports = {
         try{
             const response  =  await sequelize.transaction(async(t)=>{
 
-            const [quantity,updatedBrand] = await brands.update(req.body,{
+            const [lines,updatedBrand] = await brands.update(req.body,{
                     where: { id },
                     returning: true,
                     transaction:t

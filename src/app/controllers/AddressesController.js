@@ -124,8 +124,9 @@ module.exports = {
         try{
             const response  =  await sequelize.transaction(async(t)=>{
 
-            const updatedAddress = await addresses.update(req.body,{
+            const [lines,updatedAddress] = await addresses.update(req.body,{
                     where: { id },
+                    returning: true,
                     transaction:t
                   });
 
