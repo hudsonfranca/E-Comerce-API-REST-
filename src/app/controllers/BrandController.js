@@ -7,15 +7,17 @@ module.exports = {
     async index(req,res){
 
         try{
+
             const response  =  await sequelize.transaction(async(t)=>{
+           
                 const allBrands = await brands.findAll({attributes:["name"],transaction:t})
 
                 return allBrands;
-            })
-       
 
-        res.status(200).json(response);
-        return ;
+            })
+
+                return res.status(200).json(response);
+    
 
         }catch(err){
             res.status(400).json({error:"Unable to display all brands."});
@@ -66,7 +68,7 @@ module.exports = {
 
              await sequelize.transaction(async(t)=>{
                 await brands.destroy({
-                    where:{id},
+                    where:{id:findBrand.id},
                     transaction:t
                 })
             })

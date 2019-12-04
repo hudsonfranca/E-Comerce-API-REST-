@@ -3,7 +3,6 @@ const {products} = require('../models')
 const {customers} = require('../models')
 const sequelize = require('../models').sequelize;
 
-
 module.exports = {
 
     async index(req,res){
@@ -18,27 +17,42 @@ module.exports = {
             const findCustomer = await customers.findByPk(req.userId,{transaction:t})
     
             if(!findCustomer){
-              return  res.status(401).json({error:"Sign in or create an account."})
+               res.status(401).json({error:"Sign in or create an account."})
+               return 
             }
 
-            const findCart = await carts.findOne({where:{id_customers:findCustomer.id}})
+            const findCart = await carts.findOne({
+              attributes: [],
+              where:{id_customers:findCustomer.id},
+              transaction:t,
+              include: { 
+                association: 'Products', 
+                attributes: ["id","name","description", "price", "status"], 
+                through: { 
+                  attributes: []
+                } 
+              }
+            })
 
             
-            // if(!findCart){
-            //   return  res.status(400).json({error:"Your cart is empty"})
-            // }
+            if(!findCart){
+               res.status(400).json({error:"Your cart is empty"})
+               return
+            }
 
-            return findCart.getProducts();
+            return findCart
 
         })
 
-        return res.status(200).json(response)
+        res.status(200).json(response)
+        return
 
 
       }catch(err){
-        res.status(400).json({error:"Unable to add this product to cart."});
+        res.status(400).json({error:"Unable to return cart " + err});
         console.log(err);
         return
+        
       }
 
 
@@ -55,13 +69,14 @@ module.exports = {
           const findProduct = await products.findByPk(id,{transaction:t});
 
           if(!findProduct){
-            return  res.status(400).json({error:"This product does not exist."})
+              res.status(400).json({error:"This product does not exist."})
+              return
           }
     
             const findCustomer = await customers.findByPk(req.userId,{transaction:t})
     
             if(!findCustomer){
-               res.status(401).json({error:"Sign in or create an account."})
+               res.status(400).json({error:"Sign in or create an account."})
                return 
             }
     
@@ -79,9 +94,11 @@ module.exports = {
 
 
       }catch(err){
-        res.status(400).json({error:"Unable to add this product to cart."});
         console.log(err);
-        return
+          res.status(400).json({error:"Unable to add this product to cart."});
+          return
+        
+       
       }
 
            
@@ -111,9 +128,10 @@ module.exports = {
 
 
       }catch(err){
-        res.status(400).json({error:"Unable to delete this product."});
         console.log(err);
-        return
+        return  res.status(400).json({error:"Unable to delete this product."});
+        
+       
       }
 
     },

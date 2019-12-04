@@ -40,8 +40,6 @@ module.exports = {
 
         const {name,brand_id,description,price,status,url_images} = req.body;
 
-        
-
         const findBrand = await brands.findByPk(brand_id);
         const findCategorie = await categories.findByPk(req.params.categorie_id);
 
@@ -51,6 +49,8 @@ module.exports = {
         }else if(!findCategorie){
             res.status(400).json({error:"This categorie not exists"})
             return
+        }else if(price < 0 ){
+            return  res.status(400).json({error:"Price cannot be negative"})
         }
 
 
@@ -109,7 +109,7 @@ module.exports = {
             const response  =  await sequelize.transaction(async(t)=>{
 
                 await products.destroy({
-                    where: { id },
+                    where: { id:findProduct.id },
                     transaction:t
                   });
 

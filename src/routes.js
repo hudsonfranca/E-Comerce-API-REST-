@@ -7,6 +7,8 @@ const CategorieController = require('./app/controllers/CategorieController');
 const StockController = require('./app/controllers/StockController');
 const CartController = require('./app/controllers/CartController');
 const SessionController = require('./app/controllers/SessionController');
+const PaymentMethodsController = require('./app/controllers/PaymentMethodsController');
+const SalesHistorysController = require('./app/controllers/SalesHistorysController');
 const authMiddleware = require('./app/middleware/auth')
 
 
@@ -48,6 +50,12 @@ routes.post('/api/categorie/:categorie_id/products',ProductController.store);
  routes.delete('/api/stock/:id',StockController.delete);
  routes.put('/api/stock/:id/edit',StockController.update);
 
+ //...............PAYMENT METHODS..............................
+ routes.post('/api/paymentMethods',PaymentMethodsController.store);
+ routes.get('/api/paymentMethods',PaymentMethodsController.index);
+ routes.delete('/api/paymentMethods/:id',PaymentMethodsController.delete);
+ routes.put('/api/paymentMethods/:id/edit',PaymentMethodsController.update);
+
  
 
 
@@ -62,7 +70,14 @@ routes.use(authMiddleware)
  //...............CART ROUTES..............................
  routes.post('/api/product/:id/cart',CartController.store);
  routes.get('/api/cart',CartController.index);
- routes.delete('/api/product/:id',CartController.delete);
+ routes.delete('/api/product/:id/cart',CartController.delete);
+
+
+  //...............SALES HISTORYS ROUTES..............................
+  routes.post('/api/salesHistorys',SalesHistorysController.store);
+  routes.get('/api/salesHistorys',SalesHistorysController.index);
+  routes.delete('/api/salesHistorys/:id',SalesHistorysController.delete);
+  //routes.put('/api/salesHistorys/:id/edit',SalesHistorysController.update);
  
 
 

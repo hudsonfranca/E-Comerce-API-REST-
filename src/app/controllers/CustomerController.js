@@ -6,10 +6,14 @@ module.exports = {
 
     async index(req,res){
 
-        const findAllCustomer = await customers.findAll({})
-    
+        const response  =  await sequelize.transaction(async(t)=>{
 
-        return res.status(200).json(findAllCustomer);
+        const findAllCustomer = await customers.findAll({transaction:t})
+
+        return findAllCustomer
+    
+        })
+        return res.status(200).json(response);
     },
 
    async store(req,res){
@@ -77,7 +81,7 @@ module.exports = {
         try{
             const response  =  await sequelize.transaction(async(t)=>{
                 await customers.destroy({
-                    where: { id },
+                    where: { id:findCustomer.id },
                     transaction:t
                   });
             })

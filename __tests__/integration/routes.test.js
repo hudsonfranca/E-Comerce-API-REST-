@@ -1,14 +1,18 @@
 const truncate = require('../utils/truncate');
 const request = require('supertest');
 const app = require('../../src/app');
-const faker = require('faker');
+const jwt = require('jsonwebtoken');
 const {customers} = require('../../src/app/models');
 const {brands} = require('../../src/app/models');
 const {categories} = require('../../src/app/models');
 const {addresses} = require('../../src/app/models');
 const {products} = require('../../src/app/models');
-const {stock} = require('../../src/app/models')
-const factory = require("../factories");
+const {stock} = require('../../src/app/models');
+const {carts} = require('../../src/app/models')
+const {payment_methods} = require('../../src/app/models')
+
+
+//test.only
 
 describe('Customer Endpoints',()=>{
 
@@ -282,14 +286,7 @@ describe('Products Endpoints',()=>{
 
         const response = await request(app)
         .post(`/api/categorie/${null}/products`)
-        .send({
-            "name":"MacBook Pro",
-            "brand_id":brandCreated.id,
-            "description":"Processador - mais poder em seus núcleos ",
-            "price":8618.89,
-            "status":true,
-            "url_images":["c://imagem10","c://imagem11","c://imagem12"]
-        })
+        .send()
          
       
 
@@ -1096,6 +1093,301 @@ describe('Stock Endpoints',()=>{
 
     })
 })
+
+describe('Cart Endpoints',()=>{
+
+    it('should return the products in the cart.',async()=>{
+
+        const createdCustomer = await customers.create({
+            first_name:"Hudson",
+            last_name:"França",
+            email_address:"j1111@gmail.com",
+            password:"123456",
+            cpf:"10005911000",
+            phone_number:"12345678910"
+        })
+
+        const brandCreated = await brands.create({
+            name:"Apple"
+        });
+
+        const productCreated = await products.create({
+            "name":"Ventilador",
+            "brand_id":brandCreated.id,
+            "description":"Processador - mais poder em seus núcleos Com um processador",
+            "price":987,
+            "status":true,
+        });
+
+        const cartCreated = await carts.create({
+            id_customers:createdCustomer.id
+          })
+
+          await cartCreated.addProducts(productCreated);
+
+          const response = await request(app)
+            .get("/api/cart")
+            .set("authorization", `Bearer ${createdCustomer.generateToken()}`);
+
+        expect(response.status).toBe(200)
+
+    })
+
+    it('should not return cart products if customer is not authenticated',async()=>{
+
+          const response = await request(app)
+            .get("/api/cart")
+            .set("authorization", "Bearer " + jwt.sign({id:200},process.env.APP_SECRET,{expiresIn:86400}));
+
+        expect(response.status).toBe(401)
+
+    })
+
+    it('should return an error if the cart is not found',async()=>{
+
+        const createdCustomer = await customers.create({
+            first_name:"Hudson",
+            last_name:"França",
+            email_address:"j1121@gmail.com",
+            password:"123456",
+            cpf:"20005911000",
+            phone_number:"12345678910"
+        })
+
+
+          const response = await request(app)
+            .get("/api/cart")
+            .set("authorization", `Bearer ${createdCustomer.generateToken()}`);
+
+        expect(response.status).toBe(400)
+
+    })
+
+    it('should create a cart.',async()=>{
+
+        const createdCustomer = await customers.create({
+            first_name:"Hudson",
+            last_name:"França",
+            email_address:"j2211@gmail.com",
+            password:"123456",
+            cpf:"10002211000",
+            phone_number:"12345678910"
+        })
+
+        const brandCreated = await brands.create({
+            name:"Apple"
+        });
+
+        const productCreated = await products.create({
+            "name":"Ventilador",
+            "brand_id":brandCreated.id,
+            "description":"Processador - mais poder em seus núcleos Com um processador",
+            "price":987,
+            "status":true,
+        });
+
+        const cartCreated = await carts.create({
+            id_customers:createdCustomer.id
+          })
+
+          const response = await request(app)
+            .post(`/api/product/${productCreated.id}/cart`)
+            .set("authorization", `Bearer ${createdCustomer.generateToken()}`);
+
+        expect(response.status).toBe(200)
+
+    })
+
+    it('should not add a product that does not exist to cart.',async()=>{
+
+        
+          const response = await request(app)
+            .post(`/api/product/${null}/cart`)
+            .set("authorization", "Bearer " + jwt.sign({id:200},process.env.APP_SECRET,{expiresIn:86400}));
+
+        expect(response.status).toBe(400)
+
+    })
+
+    it('should not add a product to cart if customer does not exist',async()=>{
+
+
+        const brandCreated = await brands.create({
+            name:"Apple"
+        });
+
+        const productCreated = await products.create({
+            "name":"Ventilador",
+            "brand_id":brandCreated.id,
+            "description":"Processador - mais poder em seus núcleos Com um processador",
+            "price":987,
+            "status":true,
+        });
+
+
+          const response = await request(app)
+            .post(`/api/product/${productCreated.id}/cart`)
+            .set("authorization", "Bearer " + jwt.sign({id:200},process.env.APP_SECRET,{expiresIn:86400}));
+
+        expect(response.status).toBe(400)
+
+    })
+
+    it('Should remove a product from the cart.',async()=>{
+
+        const createdCustomer = await customers.create({
+            first_name:"Hudson",
+            last_name:"França",
+            email_address:"j3@gmail.com",
+            password:"123456",
+            cpf:"10302211000",
+            phone_number:"12345678910"
+        })
+
+        const brandCreated = await brands.create({
+            name:"Apple"
+        });
+
+        const productCreated = await products.create({
+            "name":"Ventilador",
+            "brand_id":brandCreated.id,
+            "description":"Processador - mais poder em seus núcleos Com um processador",
+            "price":987,
+            "status":true,
+        });
+
+        const cartCreated = await carts.create({
+            id_customers:createdCustomer.id
+          })
+
+          await cartCreated.addProducts(productCreated);
+
+          const response = await request(app)
+            .delete(`/api/product/${productCreated.id}/cart`)
+            .set("authorization", `Bearer ${createdCustomer.generateToken()}`);
+
+        expect(response.status).toBe(200)
+
+    })
+
+    it('Should not remove a product that does not exist from the cart.',async()=>{
+
+
+          const response = await request(app)
+            .delete(`/api/product/${null}/cart`)
+            .set("authorization", "Bearer " + jwt.sign({id:200},process.env.APP_SECRET,{expiresIn:86400}));
+
+        expect(response.status).toBe(400)
+
+    })
+
+})
+
+describe('payment_methods Endpoints',()=>{
+
+    it('Should create a payment_methods .',async()=>{
+
+        const response = await request(app)
+          .post(`/api/paymentMethods`).send({
+            name:"Cartão",
+            status:true
+          })
+          
+      expect(response.status).toBe(200)
+
+  })
+
+  it('Should delete a payment_methods .',async()=>{
+
+    const paymentMethodsCreated = await payment_methods.create({
+        name:"Cartão",
+        status:true
+    })
+
+    const response = await request(app)
+      .delete(`/api/paymentMethods/${paymentMethodsCreated.id}`).send()
+      
+  expect(response.status).toBe(200)
+
+})
+
+it('Should not delete a payment method that does not exist.',async()=>{
+
+
+    const response = await request(app)
+      .delete(`/api/paymentMethods/${null}`).send()
+      
+  expect(response.status).toBe(400)
+
+})
+
+it('Should update a payment_methods .',async()=>{
+
+    const paymentMethodsCreated = await payment_methods.create({
+        name:"Cartão",
+        status:true
+    })
+
+    const response = await request(app)
+      .put(`/api/paymentMethods/${paymentMethodsCreated.id}/edit`).send({
+        name:"Boleto",
+      })
+      
+  expect(response.status).toBe(200)
+
+})
+
+it('should not update a payment method with invalid information.',async()=>{
+
+    const paymentMethodsCreated = await payment_methods.create({
+        name:"Cartão",
+        status:true
+    })
+
+    const response = await request(app)
+      .put(`/api/paymentMethods/${paymentMethodsCreated.id}/edit`).send({
+        name:"",
+      })
+      
+  expect(response.status).toBe(400)
+
+})
+
+it('Should not update a payment method that does not exist.',async()=>{
+
+    const response = await request(app)
+      .put(`/api/paymentMethods/${null}/edit`).send({
+        name:"Boleto",
+      })
+      
+  expect(response.status).toBe(400)
+
+})
+
+it('Should return all payment methods.',async()=>{
+
+    const response = await request(app)
+      .get(`/api/paymentMethods`).send()
+      
+  expect(response.status).toBe(200)
+
+})
+})
+
+// describe('Sales History Endpoints',()=>{
+
+//     it('Should return all seles historys.',async()=>{
+         
+//         const response = await request(app)
+//         .get(`/api/salesHistorys`).set("authorization", "Bearer " + jwt.sign({id:200},process.env.APP_SECRET,{expiresIn:86400}));
+        
+//     expect(response.status).toBe(200)
+
+//     })
+
+
+// })
+
 
 
 

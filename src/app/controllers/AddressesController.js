@@ -7,16 +7,19 @@ module.exports = {
     async index(req,res){
         const {customer_id} = req.params;
 
+       
+
         try{
-             const response  =  await sequelize.transaction(async(t)=>{
+            const response  =  await sequelize.transaction(async(t)=>{
 
-                const findCustomer = await customers.findByPk(customer_id,{transaction:t});
+            const findCustomer = await customers.findByPk(customer_id,{transaction:t});
 
-                if(!findCustomer){
-                    res.status(400).json({error:"This customer not exists"})
-                    return
-                }
-
+            if(!findCustomer){
+                res.status(400).json({error:"This customer not exists"})
+                return
+            }
+            
+                
                 const findAddresses = await findCustomer.getAddresses({
                     transaction:t,
                     attributes:[
@@ -29,10 +32,10 @@ module.exports = {
                         "id_customers"
                     ]})
 
-                return findAddresses;
+                    return findAddresses;
 
-            })
-           
+                })
+
             return res.status(200).json(response);
 
         }catch(err){
@@ -96,7 +99,7 @@ module.exports = {
 
              await sequelize.transaction(async(t)=>{
                 await addresses.destroy({
-                    where:{id},
+                    where:{id:findAddress.id},
                     transaction:t
                 })
             })
