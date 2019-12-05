@@ -49,21 +49,21 @@ module.exports = {
 
         const {id_payment_methods} = req.body;
 
+        const findCustomer = await customers.findByPk(req.userId);
+        const findPaymentMethods = await payment_methods.findByPk(id_payment_methods);
+
+        if(!findCustomer){
+            res.status(401).json({error:"Sign in or create an account."})
+            return 
+         }else if(!findPaymentMethods){
+            res.status(400).json({error:"This Payment Method dos not exist"})
+            return 
+         }
+
       
         try{
 
              await sequelize.transaction(async(t)=>{
-
-                const findCustomer = await customers.findByPk(req.userId,{transaction:t});
-                const findPaymentMethods = await payment_methods.findByPk(id_payment_methods,{transaction:t});
-
-                if(!findCustomer){
-                    res.status(401).json({error:"Sign in or create an account."})
-                    return 
-                 }else if(!findPaymentMethods){
-                    res.status(401).json({error:"This Payment Method dos not"})
-                    return 
-                 }
 
                  const customerCartProducts = await carts.findOne({
                     attributes: [],
@@ -109,14 +109,17 @@ module.exports = {
                  })
            
 
-            }).then(()=>{
-                return res.json({ok:true});
             })
+                res.json({ok:true});
+                return 
+            
 
         }catch(err){
-            res.status(400).json({error:"Unable to register this sale."});
             console.log(err);
-            return
+            res.status(400).json({error:"Unable to register this sale."});
+            return 
+           
+           
 
         }
  
@@ -125,15 +128,16 @@ module.exports = {
 
         const {id} = req.params;
 
+        
+        const findSalesHistory = await sales_historys.findByPk(id);
+
+        if(!findSalesHistory){
+             res.status(400).json({error:"This sale dos not exist."})
+             return
+        }
+
         try{
             const response  =  await sequelize.transaction(async(t)=>{
-
-                const findSalesHistory = await sales_historys.findByPk(id,{transaction:t});
-
-                if(!findSalesHistory){
-                     res.status(400).json({error:"This sale dos not exist."})
-                     return
-                }
 
                 await sales_historys.destroy({
                     where:{id:findSalesHistory.id},

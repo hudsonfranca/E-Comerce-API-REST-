@@ -59,15 +59,16 @@ module.exports = {
 
         const {id} = req.params;
 
+        
+        const findpaymentMethods = await payment_methods.findByPk(id);
+
+        if(!findpaymentMethods){
+            return res.status(400).json({error:"This payment Method dos not exist."})
+        }
+
 
         try{
             const response  =  await sequelize.transaction(async(t)=>{
-
-                const findpaymentMethods = await payment_methods.findByPk(id);
-
-                if(!findpaymentMethods){
-                    return res.status(400).json({error:"This payment Method dos not exist."})
-                }
 
                 await payment_methods.destroy({
                     where:{id:findpaymentMethods.id},

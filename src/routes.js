@@ -78,8 +78,9 @@ routes.use(authMiddleware)
   routes.get('/api/salesHistorys',SalesHistorysController.index);
   routes.delete('/api/salesHistorys/:id',SalesHistorysController.delete);
   //routes.put('/api/salesHistorys/:id/edit',SalesHistorysController.update);
+
+
  
 
 
-
-module.exports = routes;
+module.exports = routes; 

@@ -10,6 +10,8 @@ const {products} = require('../../src/app/models');
 const {stock} = require('../../src/app/models');
 const {carts} = require('../../src/app/models')
 const {payment_methods} = require('../../src/app/models')
+const {sales_historys} = require('../../src/app/models')
+
 
 
 //test.only
@@ -421,6 +423,11 @@ describe('Products Endpoints',()=>{
 
 describe('Addresses Endpoints',()=>{
 
+    beforeEach(async () => {
+        await truncate();
+       
+      });
+
     it('Should create a new address',async()=>{
 
         const createdCustomer = await customers.create({
@@ -647,6 +654,11 @@ describe('Addresses Endpoints',()=>{
 
 describe('Brands Endpoints',()=>{
 
+    beforeEach(async () => {
+        await truncate();
+       
+      });
+
     it('Should create a new brand',async()=>{
 
     
@@ -758,6 +770,12 @@ describe('Brands Endpoints',()=>{
 
 
 describe('Categories Endpoints',()=>{
+
+    beforeEach(async () => {
+        await truncate();
+       
+      });
+
     it('Should create a new categorie',async()=>{
 
     
@@ -871,6 +889,11 @@ describe('Categories Endpoints',()=>{
 
 
 describe('Stock Endpoints',()=>{
+
+    beforeEach(async () => {
+        await truncate();
+       
+      });
 
     it('Should create a new stock',async()=>{
 
@@ -1096,6 +1119,11 @@ describe('Stock Endpoints',()=>{
 
 describe('Cart Endpoints',()=>{
 
+    beforeEach(async () => {
+        await truncate();
+       
+      });
+
     it('should return the products in the cart.',async()=>{
 
         const createdCustomer = await customers.create({
@@ -1285,6 +1313,11 @@ describe('Cart Endpoints',()=>{
 
 describe('payment_methods Endpoints',()=>{
 
+    beforeEach(async () => {
+        await truncate();
+       
+      });
+
     it('Should create a payment_methods .',async()=>{
 
         const response = await request(app)
@@ -1374,19 +1407,201 @@ it('Should return all payment methods.',async()=>{
 })
 })
 
-// describe('Sales History Endpoints',()=>{
+describe('Sales History Endpoints',()=>{
 
-//     it('Should return all seles historys.',async()=>{
-         
-//         const response = await request(app)
-//         .get(`/api/salesHistorys`).set("authorization", "Bearer " + jwt.sign({id:200},process.env.APP_SECRET,{expiresIn:86400}));
+    beforeEach(async () => {
+        await truncate();
+       
+      });
+
+
+    it('Should return all seles historys.',async()=>{
+
+        const createdCustomer = await customers.create({
+            first_name:"Hudson",
+            last_name:"França",
+            email_address:"hhhh@gmail.com",
+            password:"123456",
+            cpf:"22235911999",
+            phone_number:"12345678910"
+        })
+
+        const paymentMethodsCreated = await payment_methods.create({
+            name:"Cartão",
+            status:true
+         })
+
+         const brandCreated = await brands.create({
+            name:"Apple"
+        });
+
+         const productCreated = await products.create({
+            "name":"Ventilador",
+            "brand_id":brandCreated.id,
+            "description":"Processador - mais poder em seus núcleos Com um processador",
+            "price":987,
+            "status":true,
+        });
+
+        const cartCreated = await carts.create({
+            id_customers:createdCustomer.id
+          })
+
+          await cartCreated.addProducts(productCreated);
+
+       const sale = await sales_historys.create({
+            id_customers:createdCustomer.id,
+            id_payment_methods:paymentMethodsCreated.id,
+            amount:productCreated.price
+         })
+
+             //add products to sales_history_products
+            await sale.addProducts(productCreated)
         
-//     expect(response.status).toBe(200)
+         
+        const response = await request(app)
+        .get(`/api/salesHistorys`)
+        .set("authorization", `Bearer ${createdCustomer.generateToken()}`);
 
-//     })
+         expect(response.status).toBe(200)
+
+    })
+
+    it('Should create seles historys.',async()=>{
+
+        const createdCustomer = await customers.create({
+            first_name:"Hudson",
+            last_name:"França",
+            email_address:"j65466@gmail.com",
+            password:"123456",
+            cpf:"22278331666",
+            phone_number:"12345678910"
+        })
+
+        const paymentMethodsCreated = await payment_methods.create({
+            name:"Cartão",
+            status:true
+         })
+
+         const brandCreated = await brands.create({
+            name:"Apple"
+        });
+
+         const productCreated = await products.create({
+            "name":"Ventilador",
+            "brand_id":brandCreated.id,
+            "description":"Processador - mais poder em seus núcleos Com um processador",
+            "price":987,
+            "status":true,
+        });
+
+        const cartCreated = await carts.create({
+            id_customers:createdCustomer.id
+          })
+
+          await cartCreated.addProducts(productCreated);
+        
+         
+        const response = await request(app)
+        .post(`/api/salesHistorys`)
+        .set("authorization", `Bearer ${createdCustomer.generateToken()}`)
+        .send({"id_payment_methods":paymentMethodsCreated.id});
+
+         expect(response.status).toBe(200)
+
+    })
+
+    it('Should not create sales history if the customer is not authenticated.',async()=>{
+        const response = await request(app)
+        .post(`/api/salesHistorys`)
+        .set("authorization", "Bearer " + jwt.sign({id:200},process.env.APP_SECRET,{expiresIn:86400}))
+        
+
+         expect(response.status).toBe(401)
+    })
+
+    it('should not create sales history if payment method does not exist',async()=>{
+
+        const createdCustomer = await customers.create({
+            first_name:"Hudson",
+            last_name:"França",
+            email_address:"h1311@gmail.com",
+            password:"123456",
+            cpf:"22225911000",
+            phone_number:"12345678910"
+        })
+
+        const response = await request(app)
+        .post(`/api/salesHistorys`)
+        .set("authorization", `Bearer ${createdCustomer.generateToken()}`)
+        .send({id_payment_methods:1234});
+
+         expect(response.status).toBe(400)
+    })
 
 
-// })
+ it('Should delete a seles historys.',async()=>{
+
+    const createdCustomer = await customers.create({
+        first_name:"Hudson",
+        last_name:"França",
+        email_address:"hkhh@gmail.com",
+        password:"123456",
+        cpf:"22285911999",
+        phone_number:"12345678910"
+    })
+
+    const paymentMethodsCreated = await payment_methods.create({
+        name:"Cartão",
+        status:true
+     })
+
+     const brandCreated = await brands.create({
+        name:"Apple"
+    });
+
+     const productCreated = await products.create({
+        "name":"Ventilador",
+        "brand_id":brandCreated.id,
+        "description":"Processador - mais poder em seus núcleos Com um processador",
+        "price":987,
+        "status":true,
+    });
+
+    const cartCreated = await carts.create({
+        id_customers:createdCustomer.id
+      })
+
+      await cartCreated.addProducts(productCreated);
+
+   const sale = await sales_historys.create({
+        id_customers:createdCustomer.id,
+        id_payment_methods:paymentMethodsCreated.id,
+        amount:productCreated.price
+     })
+
+    
+     
+    const response = await request(app)
+    .delete(`/api/salesHistorys/${sale.id}`)
+    .set("authorization", `Bearer ${createdCustomer.generateToken()}`);
+
+     expect(response.status).toBe(200)
+    })
+
+    it('should not delete a sale history that does not exist.',async()=>{
+        const response = await request(app)
+        .delete(`/api/salesHistorys/${12345}`)
+        .set("authorization", "Bearer " + jwt.sign({id:200},process.env.APP_SECRET,{expiresIn:86400}))
+        
+
+         expect(response.status).toBe(400)
+    })
+
+    
+
+
+})
 
 
 

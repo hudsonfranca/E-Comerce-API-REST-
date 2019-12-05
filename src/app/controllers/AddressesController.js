@@ -7,17 +7,16 @@ module.exports = {
     async index(req,res){
         const {customer_id} = req.params;
 
-       
-
-        try{
-            const response  =  await sequelize.transaction(async(t)=>{
-
-            const findCustomer = await customers.findByPk(customer_id,{transaction:t});
+        const findCustomer = await customers.findByPk(customer_id);
 
             if(!findCustomer){
                 res.status(400).json({error:"This customer not exists"})
                 return
             }
+       
+
+        try{
+            const response  =  await sequelize.transaction(async(t)=>{
             
                 
                 const findAddresses = await findCustomer.getAddresses({

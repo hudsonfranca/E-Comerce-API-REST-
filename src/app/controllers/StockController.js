@@ -9,16 +9,16 @@ module.exports = {
 
         const {id} = req.params;
 
+        const findProduct = await products.findByPk(id);
+
+        if(!findProduct){
+           res.status(400).json({error:"This product does not exist."});
+           return
+        }
+
         try{
 
             const response  =  await sequelize.transaction(async(t)=>{
-
-                const findProduct = await products.findByPk(id,{ transaction:t});
-
-                if(!findProduct){
-                   res.status(400).json({error:"This product does not exist."});
-                   return
-                }
         
                 const findStock = await findProduct.getStock({attributes:["id","quantity","id_product"], transaction:t})
 
