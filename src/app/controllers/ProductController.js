@@ -16,8 +16,10 @@ module.exports = {
                 
                 const allProducts = await products.findAll({
                     attributes:["id","name","description","price", "status"],
-                    include:[{association:'Images',attributes:["id","url","id_product"]}]
+                    include:[{association:'Images',attributes:["url"]}]
                 })
+                
+               
 
                 return allProducts;
         
@@ -38,7 +40,14 @@ module.exports = {
     },
     async store(req,res){
 
-        const {name,brand_id,description,price,status,url_images} = req.body;
+        // console.log(req.body);
+        // console.log(req.files);
+
+        // return res.json({ok:true})
+
+
+        const {name,brand_id,description,price,status} = req.body;
+        const files = req.files;
 
         const findBrand = await brands.findByPk(brand_id);
         const findCategorie = await categories.findByPk(req.params.categorie_id);
@@ -72,8 +81,10 @@ module.exports = {
                 if(productCreated){
                     let imgs = [];
 
-                    url_images.map((url)=>{
-                        imgs.push({url:url,id_product:productCreated.id})
+                    files.map((fn)=>{
+                        imgs.push({url:fn.filename,
+                            
+                            id_product:productCreated.id})
                     })
 
                     await images.bulkCreate(imgs,{ transaction: t })
@@ -164,3 +175,5 @@ module.exports = {
        
     }
 }
+
+

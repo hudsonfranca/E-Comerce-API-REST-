@@ -11,6 +11,11 @@ const PaymentMethodsController = require('./app/controllers/PaymentMethodsContro
 const SalesHistorysController = require('./app/controllers/SalesHistorysController');
 const authMiddleware = require('./app/middleware/auth')
 
+const multer = require('multer');
+const uploadConfig = require('./config/upload')
+
+const upload = multer(uploadConfig);
+
 
 //...............CUSTOMERS ROUTES..............................
 routes.post('/api/customer',CustomerController.store);
@@ -19,7 +24,7 @@ routes.delete('/api/customer/:id',CustomerController.delete);
 routes.put('/api/customer/:id/edit',CustomerController.update);
 
 //...............PRODUCTS ROUTES..............................
-routes.post('/api/categorie/:categorie_id/products',ProductController.store);
+routes.post('/api/categorie/:categorie_id/products',upload.array('photos',2),ProductController.store);
  routes.delete('/api/products/:id',ProductController.delete);
  routes.put('/api/products/:id/edit',ProductController.update);
  routes.get('/api/products',ProductController.index);
@@ -62,21 +67,17 @@ routes.post('/api/categorie/:categorie_id/products',ProductController.store);
  //................SESSION..................................
  routes.post('/api/sessions',SessionController.store)
 
-
-//................AUTH MIDDLEWARE..................................
-routes.use(authMiddleware)
-
  
  //...............CART ROUTES..............................
- routes.post('/api/product/:id/cart',CartController.store);
- routes.get('/api/cart',CartController.index);
- routes.delete('/api/product/:id/cart',CartController.delete);
+ routes.post('/api/product/:id/cart',authMiddleware,CartController.store);
+ routes.get('/api/cart',authMiddleware,CartController.index);
+ routes.delete('/api/product/:id/cart',authMiddleware,CartController.delete);
 
 
   //...............SALES HISTORYS ROUTES..............................
-  routes.post('/api/salesHistorys',SalesHistorysController.store);
-  routes.get('/api/salesHistorys',SalesHistorysController.index);
-  routes.delete('/api/salesHistorys/:id',SalesHistorysController.delete);
+  routes.post('/api/salesHistorys',authMiddleware,SalesHistorysController.store);
+  routes.get('/api/salesHistorys',authMiddleware,SalesHistorysController.index);
+  routes.delete('/api/salesHistorys/:id',authMiddleware,SalesHistorysController.delete);
   //routes.put('/api/salesHistorys/:id/edit',SalesHistorysController.update);
  
 

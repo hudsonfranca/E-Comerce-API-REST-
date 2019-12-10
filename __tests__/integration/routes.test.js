@@ -226,32 +226,32 @@ describe('Products Endpoints',()=>{
        
       });
 
-    it('Should create a new Product',async()=>{
+    // it('Should create a new Product',async()=>{
 
-        const brandCreated = await brands.create({
-            name:'Apple'
-        })
+    //     const brandCreated = await brands.create({
+    //         name:'Apple'
+    //     })
 
-        const categoriesCreated = await categories.create({
-            name:'Electronics'
-        })
+    //     const categoriesCreated = await categories.create({
+    //         name:'Electronics'
+    //     })
 
-        const response = await request(app)
-        .post(`/api/categorie/${categoriesCreated.id}/products`)
-        .send({
-            "name":"MacBook Pro",
-            "brand_id":brandCreated.id,
-            "description":"Processador - mais poder em seus núcleos ",
-            "price":8618.89,
-            "status":true,
-            "url_images":["c://imagem10","c://imagem11","c://imagem12"]
-        })
+    //     const response = await request(app)
+    //     .post(`/api/categorie/${categoriesCreated.id}/products`)
+    //     .send({
+    //         "name":"MacBook Pro",
+    //         "brand_id":brandCreated.id,
+    //         "description":"Processador - mais poder em seus núcleos ",
+    //         "price":8618.89,
+    //         "status":true,
+    //         "url_images":["c://imagem10","c://imagem11","c://imagem12"]
+    //     })
          
       
 
-        expect(response.status).toBe(201)
+    //     expect(response.status).toBe(201)
 
-    })
+    // })
 
     it('should not create a new product with an invalid brand',async()=>{
 
