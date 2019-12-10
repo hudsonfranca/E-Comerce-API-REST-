@@ -2,6 +2,8 @@ require("dotenv").config({
     path:process.env.NODE_ENV === "test" ? ".env.test" : ".env"
 })
 
+const path = require('path');
+
 const express = require('express');
 
 class AppController{
@@ -18,10 +20,10 @@ class AppController{
 
     routes(){
         this.express.use(require('./routes'));
+        this.express.use('/files',express.static(path.resolve(__dirname,'..','uploads')));
     }
 }
 
-//git remote add origin https://github.com/hudsonfranca/E-comerce-API.git
-//git push -u origin master
+
 
 module.exports = new AppController().express;

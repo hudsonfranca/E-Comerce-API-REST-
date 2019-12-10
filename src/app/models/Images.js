@@ -4,7 +4,9 @@ module.exports = (sequelize,DataTypes)=>{
         url:{
             type:DataTypes.STRING,
             allowNull: false,
-            
+            get:function(){
+                return "http://localhost:3333/files/"+this.getDataValue('url') ;
+            },
             validate:{
                 notNull: true, 
                 len: [1,300],
