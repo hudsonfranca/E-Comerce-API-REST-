@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <<<<<<< HEAD
+<<<<<<< HEAD
 <coverage generated="1575582474985" clover="3.2.0">
   <project timestamp="1575582474985" name="All files">
     <metrics statements="654" coveredstatements="571" conditionals="89" coveredconditionals="72" methods="107" coveredmethods="103" elements="850" coveredelements="746" complexity="0" loc="654" ncloc="654" packages="5" files="26" classes="26"/>
+=======
+<coverage generated="1575945262057" clover="3.2.0">
+  <project timestamp="1575945262058" name="All files">
+    <metrics statements="668" coveredstatements="528" conditionals="89" coveredconditionals="61" methods="110" coveredmethods="91" elements="867" coveredelements="680" complexity="0" loc="668" ncloc="668" packages="5" files="28" classes="28"/>
+>>>>>>> Dev
 =======
 <coverage generated="1575945262057" clover="3.2.0">
   <project timestamp="1575945262058" name="All files">
@@ -75,6 +81,10 @@
         <line num="78" count="1" type="stmt"/>
         <line num="79" count="1" type="stmt"/>
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+        <line num="80" count="1" type="stmt"/>
+>>>>>>> Dev
 =======
         <line num="80" count="1" type="stmt"/>
 >>>>>>> Dev
@@ -89,7 +99,11 @@
     </package>
     <package name="src.app.controllers">
 <<<<<<< HEAD
+<<<<<<< HEAD
       <metrics statements="487" coveredstatements="413" conditionals="70" coveredconditionals="62" methods="74" coveredmethods="73"/>
+=======
+      <metrics statements="487" coveredstatements="363" conditionals="70" coveredconditionals="51" methods="75" coveredmethods="61"/>
+>>>>>>> Dev
 =======
       <metrics statements="487" coveredstatements="363" conditionals="70" coveredconditionals="51" methods="75" coveredmethods="61"/>
 >>>>>>> Dev
