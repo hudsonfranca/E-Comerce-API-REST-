@@ -1,139 +1,128 @@
-const {customers} = require('../models')
-const sequelize = require('../models').sequelize;
-
+const { customers } = require("../models");
+const sequelize = require("../models").sequelize;
 
 module.exports = {
+  async index(req, res) {
+    const response = await sequelize.transaction(async t => {
+      const findAllCustomer = await customers.findAll({ transaction: t });
 
-    async index(req,res){
+      return findAllCustomer;
+    });
+    return res.status(200).json(response);
+  },
 
-        const response  =  await sequelize.transaction(async(t)=>{
+  async store(req, res) {
+    const {
+      first_name,
+      last_name,
+      email_address,
+      cpf,
+      phone_number,
+      password
+    } = req.body;
 
-        const findAllCustomer = await customers.findAll({transaction:t})
-
-        return findAllCustomer
-    
-        })
-        return res.status(200).json(response);
-    },
-
-   async store(req,res){
-
-    const {first_name,last_name,email_address,cpf,phone_number,password} = req.body;
-    
     const findEmail = await customers.findOne({
-        where:{email_address}
-    })
+      where: { email_address }
+    });
 
-    if(findEmail){
-        res.status(400).json({error:"Choose another email."});
-        return 
+    if (findEmail) {
+      res.status(400).json({ error: "Choose another email." });
+      return;
     }
 
     const customerCpf = await customers.findOne({
-        where:{cpf}
-    })
+      where: { cpf }
+    });
 
-    if(customerCpf){
-        res.status(400).json({error:"Choose another cpf."});
-        return 
+    if (customerCpf) {
+      res.status(400).json({ error: "Choose another cpf." });
+      return;
     }
-   
 
+    try {
+      const response = await sequelize.transaction(async t => {
+        const createdCustomer = await customers.create(
+          {
+            first_name,
+            last_name,
+            email_address,
+            cpf,
+            phone_number,
+            password
+          },
+          { transaction: t }
+        );
 
-    try{
+        createdCustomer.password = undefined;
 
-        const response  =  await sequelize.transaction(async(t)=>{
+        return {
+          name: `${createdCustomer.first_name} ${createdCustomer.last_name}`,
+          access_token: createdCustomer.generateToken()
+        };
+      });
 
-            const createdCustomer = await customers.create({
-                first_name,last_name,email_address,cpf,phone_number,password
-            },{transaction:t})
-
-            createdCustomer.password = undefined;
-
-            return {
-                createdCustomer,
-                token:createdCustomer.generateToken()
-            };
-        })
-       
-
-        return res.status(201).json(response)
-
-    }catch(err){
-        return  res.status(400).json({err:err});
+      return res.status(201).json(response);
+    } catch (err) {
+      return res.status(400).json({ err: err });
     }
-    
+  },
 
-       
-    },
+  async delete(req, res) {
+    const { id } = req.params;
 
-    async delete(req,res){
+    const findCustomer = await customers.findByPk(id);
 
-        const {id} = req.params;
+    if (!findCustomer) {
+      res.status(400).json({ error: "This cutomer does not exist" });
+      return;
+    }
 
-        const findCustomer = await customers.findByPk(id);
+    try {
+      const response = await sequelize.transaction(async t => {
+        await customers.destroy({
+          where: { id: findCustomer.id },
+          transaction: t
+        });
+      });
 
-        if(!findCustomer){
-            res.status(400).json({error:"This cutomer does not exist"})
-            return
-        }
+      res.status(200).send();
+    } catch (err) {
+      res.status(400).json({ error: "Unable to delete this customer." });
+      console.log(err);
+      return;
+    }
 
-        try{
-            const response  =  await sequelize.transaction(async(t)=>{
-                await customers.destroy({
-                    where: { id:findCustomer.id },
-                    transaction:t
-                  });
-            })
+    return res.status(200).send();
+  },
 
-            res.status(200).send()
-        }catch(err){
-            res.status(400).json({error:"Unable to delete this customer."});
-            console.log(err);
-            return
-        }
+  async update(req, res) {
+    const { id } = req.params;
 
-        return res.status(200).send()
-    },
+    const findCustomer = await customers.findByPk(id);
 
-    async update(req,res){
+    if (!findCustomer) {
+      res.status(400).json({ error: "This customer does not exist" });
+      return;
+    }
 
-        const {id} = req.params;
+    try {
+      const response = await sequelize.transaction(async t => {
+        const [lines, updatedCustomer] = await customers.update(req.body, {
+          where: { id },
+          returning: true,
+          transaction: t
+        });
 
-        const findCustomer = await customers.findByPk(id);
+        return updatedCustomer;
+      });
 
-        if(!findCustomer){
-            res.status(400).json({error:"This customer does not exist"})
-            return
-        }
+      res.status(200).json(response);
 
-
-        try{
-            const response  =  await sequelize.transaction(async(t)=>{
-
-            const [lines,updatedCustomer] = await customers.update(req.body,{
-                    where: { id },
-                    returning: true,
-                    transaction:t
-                  });
-
-                  
-
-                  return updatedCustomer;
-
-            })
-
-            res.status(200).json(response);
-
-            return
-        }catch(err){
-            res.status(400).json({error:"Unable to update this customer."});
-            console.log(err);
-            return
-        }
-
-
-        
-    },
-    
-}
+      return;
+    } catch (err) {
+      res.status(400).json({ error: "Unable to update this customer." });
+      console.log(err);
+      return;
+    }
+  }
+};

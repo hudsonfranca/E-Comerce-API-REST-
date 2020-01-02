@@ -1,29 +1,33 @@
 require("dotenv").config({
-    path:process.env.NODE_ENV === "test" ? ".env.test" : ".env"
-})
+  path: process.env.NODE_ENV === "test" ? ".env.test" : ".env"
+});
 
-const path = require('path');
+const path = require("path");
 
-const express = require('express');
+const express = require("express");
 
-class AppController{
-    constructor(){
-        this.express = express();
+const cors = require("cors");
 
-        this.middlewares();
-        this.routes();
-    }
+class AppController {
+  constructor() {
+    this.express = express();
 
-    middlewares(){
-        this.express.use(express.json());
-    }
+    this.middlewares();
+    this.routes();
+  }
 
-    routes(){
-        this.express.use(require('./routes'));
-        this.express.use('/files',express.static(path.resolve(__dirname,'..','uploads')));
-    }
+  middlewares() {
+    this.express.use(cors());
+    this.express.use(express.json());
+  }
+
+  routes() {
+    this.express.use(require("./routes"));
+    this.express.use(
+      "/files",
+      express.static(path.resolve(__dirname, "..", "uploads"))
+    );
+  }
 }
-
-
 
 module.exports = new AppController().express;
