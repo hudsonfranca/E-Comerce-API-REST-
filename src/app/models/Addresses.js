@@ -1,69 +1,62 @@
+module.exports = (sequelize, DataTypes) => {
+  const addresses = sequelize.define("addresses", {
+    street_address: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notNull: true,
+        len: [1, 150],
+        notEmpty: true
+      }
+    },
+    city: {
+      type: DataTypes.STRING,
+      allowNull: false,
 
+      validate: {
+        notNull: true,
+        len: [1, 100],
+        notEmpty: true
+      }
+    },
+    zip: {
+      type: DataTypes.STRING,
+      allowNull: false,
 
-module.exports = (sequelize,DataTypes)=>{
-    const addresses = sequelize.define("addresses",{
-        street_address:{
-            type:DataTypes.STRING,
-            allowNull: false,
-            validate:{
-                notNull: true, 
-                len: [1,150],
-                notEmpty: true,
-               }
-          },
-          city:{
-            type:DataTypes.STRING,
-            allowNull: false,
-            
-            validate:{
-                notNull: true, 
-                len: [1,100],
-                notEmpty: true,
-               }
-          },
-          zip:{
-            type:DataTypes.STRING,
-            allowNull: false,
-            
-            validate:{
-                notNull: true, 
-                len: [5,10],
-                notEmpty: true,
-               }
-          },
-          country:{
-            type:DataTypes.STRING,
-            allowNull: false,
-            
-            validate:{
-                notNull: true, 
-                len: [1,30],
-                notEmpty: true,
-               }
-          },
-          state:{
-            type:DataTypes.STRING,
-            allowNull: false,
-            
-            validate:{
-                notNull: true, 
-                len: [1,30],
-                notEmpty: true,
-               }
-          }
-    })
+      validate: {
+        notNull: true,
+        len: [5, 10],
+        notEmpty: true
+      }
+    },
+    country: {
+      type: DataTypes.STRING,
+      allowNull: false,
 
-    addresses.associate = function(models) {
-        addresses.belongsTo(models.customers,{foreignKey:'id_customers',as:'customers'})
+      validate: {
+        notNull: true,
+        len: [1, 40],
+        notEmpty: true
+      }
+    },
+    state: {
+      type: DataTypes.STRING,
+      allowNull: false,
+
+      validate: {
+        notNull: true,
+        len: [1, 40],
+        notEmpty: true
+      }
     }
-    
+  });
 
+  addresses.associate = function(models) {
+    addresses.belongsTo(models.customers, {
+      foreignKey: "id_customers",
+      as: "customers"
+    });
+  };
 
-    return addresses;
-}
-
-
-
-
-
-
+  return addresses;
+};

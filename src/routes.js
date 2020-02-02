@@ -11,6 +11,7 @@ const PaymentMethodsController = require("./app/controllers/PaymentMethodsContro
 const SalesHistorysController = require("./app/controllers/SalesHistorysController");
 const FavoritesController = require("./app/controllers/FavoritesController");
 const OrderController = require("./app/controllers/OrderController");
+const CustomerPageController = require("./app/controllers/CustomerPageController");
 const authMiddleware = require("./app/middleware/auth");
 
 const multer = require("multer");
@@ -21,8 +22,16 @@ const upload = multer(uploadConfig);
 //...............CUSTOMERS ROUTES..............................
 routes.post("/api/customer", CustomerController.store);
 routes.get("/api/customer", CustomerController.index);
+routes.get("/api/customer/search", CustomerController.show);
 routes.delete("/api/customer/:id", CustomerController.delete);
 routes.put("/api/customer/:id/edit", CustomerController.update);
+
+//...............CUSTOMERS FRONT END ADMIN ROUTES..............................
+routes.get("/api/customer/:id", CustomerPageController.show);
+routes.put(
+  "/api/customer/:id_customer/addresses/:id_addresses/edit",
+  CustomerPageController.update
+);
 
 //...............PRODUCTS ROUTES..............................
 routes.post(

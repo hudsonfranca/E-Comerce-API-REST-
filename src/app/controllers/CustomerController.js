@@ -1,12 +1,78 @@
 const { customers } = require("../models");
 const sequelize = require("../models").sequelize;
+const Sequelize = require("../models").Sequelize;
+const bcrypt = require("bcrypt");
 
 module.exports = {
   async index(req, res) {
     const response = await sequelize.transaction(async t => {
-      const findAllCustomer = await customers.findAll({ transaction: t });
+      try {
+        const findAllCustomer = await customers.findAll({
+          attributes: [
+            "id",
+            "first_name",
+            "last_name",
+            "email_address",
+            "cpf",
+            "phone_number",
+            "createdAt"
+          ],
+          include: [
+            {
+              association: "Addresses",
+              attributes: ["street_address", "city", "zip", "country", "state"]
+            }
+          ],
+          transaction: t
+        });
 
-      return findAllCustomer;
+        return findAllCustomer;
+      } catch (err) {
+        console.log(err);
+        return res.status(400).json({ err: "error" });
+      }
+    });
+    return res.status(200).json(response);
+  },
+  async show(req, res) {
+    const { name } = req.query;
+    const response = await sequelize.transaction(async t => {
+      try {
+        const findAllCustomer = await customers.findAll({
+          where: sequelize.where(
+            sequelize.fn(
+              "concat",
+              sequelize.col("first_name"),
+              " ",
+              sequelize.col("last_name")
+            ),
+            {
+              [Sequelize.Op.iLike]: `%${name}%`
+            }
+          ),
+          attributes: [
+            "id",
+            "first_name",
+            "last_name",
+            "email_address",
+            "cpf",
+            "phone_number",
+            "createdAt"
+          ],
+          include: [
+            {
+              association: "Addresses",
+              attributes: ["street_address", "city", "zip", "country", "state"]
+            }
+          ],
+          transaction: t
+        });
+
+        return findAllCustomer;
+      } catch (err) {
+        console.log(err);
+        return res.status(400).json({ err: "error" });
+      }
     });
     return res.status(200).json(response);
   },
@@ -98,6 +164,18 @@ module.exports = {
   async update(req, res) {
     const { id } = req.params;
 
+    async function hashPassword() {
+      let data = req.body;
+
+      const hash = await bcrypt.hash(req.body.password, 16);
+
+      data.password = hash;
+
+      return data;
+    }
+
+    const data = await hashPassword();
+
     const findCustomer = await customers.findByPk(id);
 
     if (!findCustomer) {
@@ -107,7 +185,7 @@ module.exports = {
 
     try {
       const response = await sequelize.transaction(async t => {
-        const [lines, updatedCustomer] = await customers.update(req.body, {
+        const [lines, updatedCustomer] = await customers.update(data, {
           where: { id },
           returning: true,
           transaction: t
