@@ -55,11 +55,6 @@ module.exports = {
 
     const findAddresses = await addresses.findByPk(id_addresses);
 
-    if (!findAddresses) {
-      res.status(400).json({ error: "This addresses does not exist" });
-      return;
-    }
-
     const {
       first_name,
       last_name,
@@ -97,18 +92,49 @@ module.exports = {
         let addressesData = {};
 
         if (updatedCustomer) {
-          const [lines, updateAddresses] = await addresses.update(
-            { street_address, city, zip, country, state },
-            {
-              where: { id: id_addresses },
-              returning: true,
-              transaction: t
+          if (findAddresses) {
+            try {
+              const [lines, updateAddresses] = await addresses.update(
+                { street_address, city, zip, country, state },
+                {
+                  where: { id: id_addresses },
+                  returning: true,
+                  transaction: t
+                }
+              );
+              addressesData = updateAddresses;
+            } catch (err) {
+              res
+                .status(400)
+                .json({ error: "Unable to update this customer." });
+              console.log(err);
+              return;
             }
-          );
+          } else if (!findAddresses) {
+            try {
+              const addressCreated = await addresses.create(
+                {
+                  street_address,
+                  city,
+                  zip,
+                  country,
+                  state,
+                  id_customers: id_addresses
+                },
+                { transaction: t }
+              );
 
-          addressesData = updateAddresses;
+              addressesData = addressCreated;
+            } catch (err) {
+              res
+                .status(400)
+                .json({ error: "Unable to update this customer." });
+              console.log(err);
+              return;
+            }
+          }
         }
-
+        updatedCustomer[0].password = "";
         return { updatedCustomer, addressesData };
       });
 
