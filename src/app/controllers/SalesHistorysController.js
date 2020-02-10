@@ -106,7 +106,13 @@ module.exports = {
                   id_sales_history: sale.id
                 },
                 { transaction: t }
-              )
+              ),
+
+              //Clear Cart
+              await carts.destroy({
+                where: { id_customers: findCustomer.id },
+                transaction: t
+              })
             );
           });
       });

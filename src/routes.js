@@ -12,6 +12,7 @@ const SalesHistorysController = require("./app/controllers/SalesHistorysControll
 const FavoritesController = require("./app/controllers/FavoritesController");
 const OrderController = require("./app/controllers/OrderController");
 const CustomerPageController = require("./app/controllers/CustomerPageController");
+const ImageController = require("./app/controllers/ImageController");
 const authMiddleware = require("./app/middleware/auth");
 
 const multer = require("multer");
@@ -33,15 +34,19 @@ routes.put(
   CustomerPageController.update
 );
 
-//...............PRODUCTS ROUTES..............................
+//...............PRODUCTS Images..............................
 routes.post(
-  "/api/categorie/:categorie_id/products",
-  upload.array("photos", 2),
-  ProductController.store
+  "/api/product/:id/images",
+  upload.single("photos"),
+  ImageController.store
 );
+
+//...............PRODUCTS ROUTES..............................
+routes.post("/api/categorie/:categorie_id/products", ProductController.store);
 routes.delete("/api/products/:id", ProductController.delete);
 routes.put("/api/products/:id/edit", ProductController.update);
 routes.get("/api/products", ProductController.index);
+routes.get("/api/products/search", ProductController.show);
 
 //...............ADDRESSES ROUTES..............................
 routes.post("/api/customer/:customer_id/addresses", AddressesController.store);
