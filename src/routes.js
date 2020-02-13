@@ -34,19 +34,23 @@ routes.put(
   CustomerPageController.update
 );
 
-//...............PRODUCTS Images..............................
+//...............IMAGES..............................
 routes.post(
   "/api/product/:id/images",
   upload.single("photos"),
   ImageController.store
 );
 
+routes.delete("/api/images/:id", ImageController.delete);
+
+routes.get("/api/product/:id/images", ImageController.show);
+
 //...............PRODUCTS ROUTES..............................
 routes.post("/api/categorie/:categorie_id/products", ProductController.store);
 routes.delete("/api/products/:id", ProductController.delete);
 routes.put("/api/products/:id/edit", ProductController.update);
 routes.get("/api/products", ProductController.index);
-routes.get("/api/products/search", ProductController.show);
+routes.get("/api/products/:id", ProductController.show);
 
 //...............ADDRESSES ROUTES..............................
 routes.post("/api/customer/:customer_id/addresses", AddressesController.store);

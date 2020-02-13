@@ -11,16 +11,24 @@ module.exports = {
   async index(req, res) {
     try {
       const response = await sequelize.transaction(async t => {
-        const allProducts = await products.findAll({
-          attributes: ["id", "name", "description", "price", "status"],
-          include: [
-            { association: "Images", attributes: ["url"] },
-            {
-              association: "Brand",
-              attributes: ["id", "name"]
-            }
-          ]
-        });
+        const allProducts = await products.findAll(
+          {
+            attributes: ["id", "name", "description", "price", "status"],
+            include: [
+              { association: "Images", attributes: ["url"] },
+              {
+                association: "Brand",
+                attributes: ["id", "name"]
+              },
+              {
+                association: "Categories",
+                attributes: ["id", "name"],
+                through: { attributes: [] }
+              }
+            ]
+          },
+          { transaction: t }
+        );
 
         return allProducts;
       });
@@ -33,36 +41,38 @@ module.exports = {
     }
   },
   async show(req, res) {
-    const { name } = req.query;
-    const response = await sequelize.transaction(async t => {
-      try {
-        const findAllProducts = await products.findAll({
-          where: {
-            name: {
-              [Sequelize.Op.iLike]: `%${name}%`
-            }
-          },
-          attributes: ["id", "name", "description", "price", "status"],
-          include: [
-            {
-              association: "Images",
-              attributes: ["url"]
-            },
-            {
-              association: "Brand",
-              attributes: ["id", "name"]
-            }
-          ],
-          transaction: t
-        });
+    const { id } = req.params;
 
-        return findAllProducts;
-      } catch (err) {
-        console.log(err);
-        return res.status(400).json({ err: "error" });
-      }
-    });
-    return res.status(200).json(response);
+    try {
+      const response = await sequelize.transaction(async t => {
+        const product = await products.findByPk(
+          id,
+          {
+            attributes: ["id", "name", "description", "price", "status"],
+            include: [
+              { association: "Images", attributes: ["id", "url"] },
+              {
+                association: "Brand",
+                attributes: ["id", "name"]
+              },
+              {
+                association: "Categories",
+                attributes: ["id", "name"],
+                through: { attributes: [] }
+              }
+            ]
+          },
+          { transaction: t }
+        );
+
+        return product;
+      });
+
+      return res.status(200).json(response);
+    } catch (err) {
+      console.log(err);
+      return res.status(400).json({ err: "error" });
+    }
   },
   async store(req, res) {
     const { name, brand_id, description, price, status } = req.body;
@@ -169,6 +179,15 @@ module.exports = {
 
     const findProduct = await products.findByPk(id);
 
+    const { name, description, price, status, brand_id, Categories } = req.body;
+
+    const findCategorie = await categories.findByPk(Categories);
+
+    if (!findCategorie) {
+      res.status(400).json({ error: "This categorie not exists" });
+      return;
+    }
+
     if (!findProduct) {
       res.status(400).json({ error: "This product does not exist" });
       return;
@@ -176,11 +195,22 @@ module.exports = {
 
     try {
       const response = await sequelize.transaction(async t => {
-        const [lines, updatedProduct] = await products.update(req.body, {
-          where: { id },
-          returning: true,
-          transaction: t
-        });
+        const [lines, updatedProduct] = await products.update(
+          { name, description, price, status, brand_id },
+          {
+            where: { id },
+            returning: true,
+            transaction: t
+          }
+        );
+
+        if (updatedProduct) {
+          await findProduct.setCategories([]).then(async () => {
+            await findProduct.addCategories(findCategorie, {
+              transaction: t
+            });
+          });
+        }
 
         return updatedProduct;
       });
