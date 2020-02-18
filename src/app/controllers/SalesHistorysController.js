@@ -12,13 +12,7 @@ module.exports = {
     try {
       const response = await sequelize.transaction(async t => {
         const allSalesHistory = await sales_historys.findAll({
-          attributes: [
-            "id",
-            "date",
-            "id_customers",
-            "id_payment_methods",
-            "amount"
-          ],
+          attributes: ["id", "id_customers", "id_payment_methods", "amount"],
           transaction: t,
           include: {
             association: "Products",

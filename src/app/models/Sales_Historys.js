@@ -11,10 +11,6 @@ module.exports = (sequelize, DataTypes) => {
       validate: {
         isDecimal: true
       }
-    },
-    date: {
-      type: DataTypes.DATE,
-      defaultValue: Date.now()
     }
   });
 

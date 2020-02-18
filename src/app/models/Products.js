@@ -5,7 +5,6 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       validate: {
         notNull: true,
-        len: [1, 50],
         notEmpty: true
       }
     },
@@ -14,7 +13,6 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       validate: {
         notNull: true,
-        len: [1, 2000],
         notEmpty: true
       }
     },

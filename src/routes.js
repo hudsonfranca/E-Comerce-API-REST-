@@ -11,6 +11,7 @@ const PaymentMethodsController = require("./app/controllers/PaymentMethodsContro
 const SalesHistorysController = require("./app/controllers/SalesHistorysController");
 const FavoritesController = require("./app/controllers/FavoritesController");
 const OrderController = require("./app/controllers/OrderController");
+const OrderByStatusController = require("./app/controllers/OrderByStatusController");
 const CustomerPageController = require("./app/controllers/CustomerPageController");
 const ImageController = require("./app/controllers/ImageController");
 const authMiddleware = require("./app/middleware/auth");
@@ -72,7 +73,8 @@ routes.put("/api/categories/:id/edit", CategorieController.update);
 
 //...............STOCK ROUTES..............................
 routes.post("/api/product/:id/stock", StockController.store);
-routes.get("/api/product/:id/stock", StockController.index);
+routes.get("/api/product/:id/stock", StockController.show);
+routes.get("/api/stock", StockController.index);
 routes.delete("/api/stock/:id", StockController.delete);
 routes.put("/api/stock/:id/edit", StockController.update);
 
@@ -91,8 +93,10 @@ routes.get("/api/cart", authMiddleware, CartController.index);
 routes.delete("/api/product/:id/cart", authMiddleware, CartController.delete);
 
 //...............ORDERS ROUTES..............................
-routes.get("/api/orders", OrderController.index);
-routes.delete("/api/order/:id", OrderController.delete);
+routes.get("/api/orders/index", OrderController.index);
+routes.get("/api/orders/:id/show", OrderController.show);
+routes.get("/api/orders/status/:name", OrderByStatusController.show);
+routes.delete("/api/order/:id/delete", OrderController.delete);
 routes.put("/api/order/:id/edit", OrderController.update);
 
 //...............FAVORITES ROUTES..............................
