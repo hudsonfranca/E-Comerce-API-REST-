@@ -31,10 +31,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   });
   products.associate = function(models) {
-    products.belongsToMany(models.sales_historys, {
+    products.belongsToMany(models.orders, {
       foreignKey: "id_products",
-      through: "sales_history_products",
-      as: "Sales"
+      through: "orders_products",
+      as: "Orders"
     });
 
     products.belongsToMany(models.favorites, {
@@ -53,6 +53,11 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: "id_product",
       through: "cart_products",
       as: "Carts"
+    });
+
+    products.hasMany(models.orders_products, {
+      foreignKey: "id_products",
+      as: "ProductsOrders"
     });
 
     products.hasMany(models.images, { foreignKey: "id_product", as: "Images" });

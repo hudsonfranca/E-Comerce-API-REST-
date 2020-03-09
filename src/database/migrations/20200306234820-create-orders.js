@@ -2,7 +2,7 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable("addresses", {
+    return queryInterface.createTable("orders", {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
@@ -10,32 +10,27 @@ module.exports = {
         allowNull: false,
         unique: true
       },
-      street_address: {
-        type: Sequelize.STRING(150),
-        allowNull: false
-      },
-      city: {
-        type: Sequelize.STRING(100),
-        allowNull: false
-      },
-      zip: {
-        type: Sequelize.STRING(20),
-        allowNull: false
-      },
-      country: {
-        type: Sequelize.STRING(40),
-        allowNull: false
-      },
-      state: {
-        type: Sequelize.STRING(40),
-        allowNull: false
-      },
       id_customers: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: { model: "customers", key: "id" },
         onUpdate: "CASCADE",
         onDelete: "CASCADE"
+      },
+      id_payment_methods: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: { model: "payment_methods", key: "id" },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE"
+      },
+      amount: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false
+      },
+      status: {
+        type: Sequelize.STRING(15),
+        allowNull: false
       },
       created_at: {
         allowNull: false,
@@ -49,6 +44,6 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable("addresses");
+    return queryInterface.dropTable("orders");
   }
 };

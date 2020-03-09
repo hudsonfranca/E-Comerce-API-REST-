@@ -2,7 +2,7 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable("customers", {
+    return queryInterface.createTable("addresses", {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
@@ -10,30 +10,24 @@ module.exports = {
         allowNull: false,
         unique: true
       },
-      first_name: {
-        type: Sequelize.STRING(50),
+      street_address: {
+        type: Sequelize.STRING(150),
         allowNull: false
       },
-      last_name: {
-        type: Sequelize.STRING(50),
+      city: {
+        type: Sequelize.STRING(100),
         allowNull: false
       },
-      email_address: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        unique: true
-      },
-      password: {
-        type: Sequelize.STRING(500),
-        allowNull: false
-      },
-      cpf: {
-        type: Sequelize.STRING(11),
-        allowNull: false,
-        unique: true
-      },
-      phone_number: {
+      zip: {
         type: Sequelize.STRING(20),
+        allowNull: false
+      },
+      country: {
+        type: Sequelize.STRING(40),
+        allowNull: false
+      },
+      state: {
+        type: Sequelize.STRING(40),
         allowNull: false
       },
       created_at: {
@@ -43,11 +37,19 @@ module.exports = {
       updated_at: {
         allowNull: false,
         type: Sequelize.DATE
+      },
+      addressable_type: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      addressable_id: {
+        type: Sequelize.INTEGER,
+        allowNull: false
       }
     });
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable("customers");
+    return queryInterface.dropTable("addresses");
   }
 };

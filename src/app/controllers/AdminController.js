@@ -1,4 +1,4 @@
-const { customers, users } = require("../models");
+const { admins, users } = require("../models");
 const sequelize = require("../models").sequelize;
 const Sequelize = require("../models").Sequelize;
 const bcrypt = require("bcrypt");
@@ -7,8 +7,8 @@ module.exports = {
   async index(req, res) {
     const response = await sequelize.transaction(async t => {
       try {
-        const findAllCustomer = await customers.findAll({
-          attributes: ["id"],
+        const findAllAdmins = await admins.findAll({
+          attributes: ["id", "type"],
           include: [
             {
               association: "User",
@@ -38,7 +38,7 @@ module.exports = {
           transaction: t
         });
 
-        return findAllCustomer;
+        return findAllAdmins;
       } catch (err) {
         console.log(err);
         return res.status(400).json({ err: "error" });
@@ -50,7 +50,7 @@ module.exports = {
     const { name } = req.query;
     const response = await sequelize.transaction(async t => {
       try {
-        const findAllCustomer = await users.findAll({
+        const findAllAdmins = await users.findAll({
           where: sequelize.where(
             sequelize.fn(
               "concat",
@@ -75,12 +75,16 @@ module.exports = {
             {
               association: "Addresses",
               attributes: ["street_address", "city", "zip", "country", "state"]
+            },
+            {
+              association: "Admin",
+              attributes: ["type"]
             }
           ],
           transaction: t
         });
 
-        return findAllCustomer;
+        return findAllAdmins;
       } catch (err) {
         console.log(err);
         return res.status(400).json({ err: "error" });
@@ -96,7 +100,8 @@ module.exports = {
       email_address,
       cpf,
       phone_number,
-      password
+      password,
+      type
     } = req.body;
 
     const findEmail = await users.findOne({
@@ -108,18 +113,18 @@ module.exports = {
       return;
     }
 
-    const customerCpf = await users.findOne({
+    const adminCpf = await users.findOne({
       where: { cpf }
     });
 
-    if (customerCpf) {
+    if (adminCpf) {
       res.status(400).json({ error: "Choose another cpf." });
       return;
     }
 
     try {
       const response = await sequelize.transaction(async t => {
-        const createdUser = await users.create(
+        const createdAdmin = await users.create(
           {
             first_name,
             last_name,
@@ -131,18 +136,19 @@ module.exports = {
           { transaction: t }
         );
 
-        await customers.create(
+        await admins.create(
           {
-            id: createdUser.id
+            id: createdAdmin.id,
+            type
           },
           { transaction: t }
         );
 
-        createdUser.password = undefined;
+        createdAdmin.password = undefined;
 
         return {
-          name: `${createdUser.first_name} ${createdUser.last_name}`,
-          access_token: createdUser.generateToken()
+          name: `${createdAdmin.first_name} ${createdAdmin.last_name}`,
+          access_token: createdAdmin.generateToken()
         };
       });
 
@@ -155,24 +161,24 @@ module.exports = {
   async delete(req, res) {
     const { id } = req.params;
 
-    const findCustomer = await users.findByPk(id);
+    const findAdmin = await users.findByPk(id);
 
-    if (!findCustomer) {
-      res.status(400).json({ error: "This cutomer does not exist" });
+    if (!findAdmin) {
+      res.status(400).json({ error: "This admin does not exist" });
       return;
     }
 
     try {
       const response = await sequelize.transaction(async t => {
         await users.destroy({
-          where: { id: findCustomer.id },
+          where: { id: findAdmin.id },
           transaction: t
         });
       });
 
       res.status(200).send();
     } catch (err) {
-      res.status(400).json({ error: "Unable to delete this customer." });
+      res.status(400).json({ error: "Unable to delete this admin." });
       console.log(err);
       return;
     }
@@ -195,16 +201,22 @@ module.exports = {
 
     const dataWithHashPassword = await hashPassword();
 
-    const findCustomer = await users.findByPk(id);
+    const findAdmin = await users.findByPk(id);
 
-    if (!findCustomer) {
+    if (!findAdmin) {
       res.status(400).json({ error: "This customer does not exist" });
       return;
     }
 
     try {
       const response = await sequelize.transaction(async t => {
-        const [lines, updatedCustomer] = await users.update(
+        const [lines, updatedUser] = await users.update(dataWithHashPassword, {
+          where: { id },
+          returning: true,
+          transaction: t
+        });
+
+        const [linesAdmin, updatedAdmin] = await admins.update(
           dataWithHashPassword,
           {
             where: { id },
@@ -213,14 +225,14 @@ module.exports = {
           }
         );
 
-        return updatedCustomer;
+        return updatedUser;
       });
 
       res.status(200).json(response);
 
       return;
     } catch (err) {
-      res.status(400).json({ error: "Unable to update this customer." });
+      res.status(400).json({ error: "Unable to update this admin." });
       console.log(err);
       return;
     }

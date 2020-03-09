@@ -1,65 +1,63 @@
-const { orders } = require("../models");
+const Decimal = require("decimal.js");
+const {
+  orders,
+  payment_methods,
+  orders_products,
+  customers,
+  products,
+  carts,
+  addresses
+} = require("../models");
+
 const sequelize = require("../models").sequelize;
 
 module.exports = {
   async index(req, res) {
     try {
       const response = await sequelize.transaction(async t => {
-        const allOrders = await orders.findAndCountAll(
-          {
-            attributes: ["id", "status"],
-            include: [
-              {
-                association: "Sale",
-                attributes: [
-                  "id",
-                  "id_customers",
-                  "id_payment_methods",
-                  "amount",
-                  "created_at"
-                ],
-                include: [
-                  {
-                    association: "Products",
-                    attributes: ["id", "name", "brand_id", "description"],
-                    through: { attributes: [] }
-                  },
-                  {
-                    association: "Customers",
-                    attributes: [
-                      "id",
-                      "first_name",
-                      "last_name",
-                      "email_address"
-                    ],
-                    include: [
-                      {
-                        association: "Addresses",
-                        attributes: [
-                          "id",
-                          "street_address",
-                          "city",
-                          "zip",
-                          "country",
-                          "state"
-                        ]
-                      }
-                    ]
-                  }
-                ]
+        const allOrders = await orders.findAndCountAll({
+          attributes: [
+            "id",
+            "id_customers",
+            "id_payment_methods",
+            "status",
+            "amount"
+          ],
+          transaction: t,
+          include: [
+            {
+              association: "Products",
+              attributes: ["id", "name", "description", "price", "status"],
+              through: {
+                attributes: []
               }
-            ],
-            distinct: true
-          },
-          { transaction: t }
-        );
+            },
+            {
+              association: "Customers",
+              attributes: ["id", "first_name", "last_name", "email_address"],
+              include: [
+                {
+                  association: "Addresses",
+                  attributes: [
+                    "id",
+                    "street_address",
+                    "city",
+                    "zip",
+                    "country",
+                    "state"
+                  ]
+                }
+              ]
+            }
+          ]
+        });
+
         return allOrders;
       });
 
-      res.status(200).json(response);
-      return;
+      return res.status(200).json(response);
     } catch (err) {
-      res.status(400).json({ error: "Unable to return cart " + err });
+      res.status(400).json({ error: "unable to return orders" });
       console.log(err);
       return;
     }
@@ -71,43 +69,34 @@ module.exports = {
         const allOrders = await orders.findByPk(
           id,
           {
-            attributes: ["id", "status"],
+            attributes: [
+              "id",
+              "id_customers",
+              "id_payment_methods",
+              "status",
+              "amount"
+            ],
             include: [
               {
-                association: "Sale",
-                attributes: [
-                  "id",
-                  "id_customers",
-                  "id_payment_methods",
-                  "amount",
-                  "created_at"
-                ],
+                association: "Products",
+                attributes: ["id", "name", "description", "price", "status"],
+                through: {
+                  attributes: []
+                }
+              },
+              {
+                association: "Customers",
+                attributes: ["id", "first_name", "last_name", "email_address"],
                 include: [
                   {
-                    association: "Products",
-                    attributes: ["id", "name", "brand_id", "description"],
-                    through: { attributes: [] }
-                  },
-                  {
-                    association: "Customers",
+                    association: "Addresses",
                     attributes: [
                       "id",
-                      "first_name",
-                      "last_name",
-                      "email_address"
-                    ],
-                    include: [
-                      {
-                        association: "Addresses",
-                        attributes: [
-                          "id",
-                          "street_address",
-                          "city",
-                          "zip",
-                          "country",
-                          "state"
-                        ]
-                      }
+                      "street_address",
+                      "city",
+                      "zip",
+                      "country",
+                      "state"
                     ]
                   }
                 ]
@@ -122,60 +111,177 @@ module.exports = {
       res.status(200).json(response);
       return;
     } catch (err) {
-      res.status(400).json({ error: "Unable to return cart " + err });
+      res.status(400).json({ error: "Unable to return this order" + err });
       console.log(err);
       return;
     }
   },
+  async store(req, res) {
+    const { id_payment_methods, status, quantity, orderAddress } = req.body;
 
+    const findCustomer = await customers.findByPk(req.userId);
+    const findPaymentMethods = await payment_methods.findByPk(
+      id_payment_methods
+    );
+
+    if (!findCustomer) {
+      res.status(401).json({ error: "Sign in or create an account." });
+      return;
+    } else if (!findPaymentMethods) {
+      res.status(400).json({ error: "This Payment Method dos not exist" });
+      return;
+    }
+
+    try {
+      await sequelize.transaction(async t => {
+        const customerCartProducts = await carts.findOne({
+          attributes: [],
+          where: { id_customers: findCustomer.id },
+          transaction: t,
+          include: {
+            association: "Products",
+            attributes: ["id", "name", "description", "price", "status"],
+            through: {
+              attributes: []
+            }
+          }
+        });
+
+        if (!customerCartProducts) {
+          res.status(400).json({ error: "Your cart is empty" });
+          return;
+        }
+
+        const validProducts = customerCartProducts.Products.filter(product => {
+          return product.status === true;
+        });
+
+        const amount = validProducts.reduce((prevVal, elem) => {
+          const productQuantity = quantity.filter(product => {
+            return elem.id === product.id;
+          });
+
+          const priceByQuantity = new Decimal(productQuantity[0].qtd).mul(
+            elem.price
+          );
+
+          return new Decimal(prevVal).plus(priceByQuantity);
+        }, 0);
+
+        const orderCreated = await orders.create(
+          {
+            id_customers: findCustomer.id,
+            id_payment_methods,
+            amount,
+            status
+          },
+          { transaction: t }
+        );
+
+        if (orderCreated) {
+          const addProductToOrder = await Promise.all(
+            validProducts.map(async product => {
+              let findProduct = await products.findByPk(product.id);
+
+              const productQuantity = quantity.filter(product => {
+                return findProduct.id === product.id;
+              });
+
+              await orders_products.create(
+                {
+                  id_orders: orderCreated.id,
+                  id_products: findProduct.id,
+                  quantity: productQuantity[0].qtd
+                },
+                { transaction: t }
+              );
+            })
+          );
+
+          const addressCreated = await orderCreated.createOrdersAddresse(
+            orderAddress
+          );
+
+          console.log("1", addressCreated.addressable_id === orderCreated.id);
+
+          console.log("2", addressCreated.addressable_type);
+
+          const associatedAddressable = await addressCreated.getAddressable();
+          console.log("3", associatedAddressable);
+
+          if (addProductToOrder) {
+            //Clear Cart
+            await carts.destroy({
+              where: { id_customers: findCustomer.id },
+              transaction: t
+            });
+          }
+        }
+      });
+      res.json({ ok: true });
+      return;
+    } catch (err) {
+      console.log(err);
+      res.status(400).json({ error: "Unable to register this order." });
+      return;
+    }
+  },
   async delete(req, res) {
     const { id } = req.params;
 
-    const findOrder = await orders.findByPk(id);
+    const findSalesHistory = await orders.findByPk(id);
 
-    if (!findOrder) {
-      return res.status(400).json({ error: "This order does not exist." });
+    if (!findSalesHistory) {
+      res.status(400).json({ error: "This order dos not exist." });
+      return;
     }
 
     try {
       const response = await sequelize.transaction(async t => {
         await orders.destroy({
-          where: { id: findOrder.id },
+          where: { id: findSalesHistory.id },
           transaction: t
         });
       });
 
       return res.status(200).json();
     } catch (err) {
+      res.status(400).json({ error: "Unable to delete this sale." });
       console.log(err);
-      return res.status(400).json({ error: "Unable to delete this order." });
-    }
-  },
-  async update(req, res) {
-    const { id } = req.params;
-
-    const findOrder = await orders.findByPk(id);
-
-    if (!findOrder) {
-      return res.status(400).json({ error: "This order does not exist." });
-    }
-
-    try {
-      const response = await sequelize.transaction(async t => {
-        const [lines, updatedOrder] = await orders.update(req.body, {
-          where: { id },
-          returning: true,
-          transaction: t
-        });
-
-        return updatedOrder;
-      });
-      res.status(200).json(response);
-
       return;
-    } catch (err) {
-      console.log(err);
-      return res.status(400).json({ error: "Unable to update this order." });
     }
   }
+
+  // async update(req,res){
+  //     const {id} = req.params;
+
+  //  try{
+  //         const response  =  await sequelize.transaction(async(t)=>{
+
+  //             const findSalesHistory = await orders.findByPk(id,{transaction:t});
+
+  //             if(!findSalesHistory){
+  //                  res.status(400).json({error:"This sale dos not exist."})
+  //                  return
+  //             }
+
+  //             const [lines,updatedSalesHistory] = await orders.update(req.body,{
+  //                 where: { id:findSalesHistory.id },
+  //                 returning: true,
+  //                 transaction:t
+  //               });
+
+  //               return updatedSalesHistory;
+
+  //         })
+
+  //         res.status(200).json(response);
+
+  //     }catch(err){
+  //         res.status(400).json({error:"Unable to update this sale."});
+  //         console.log(err);
+  //         return
+  //     }
+
+  // }
 };

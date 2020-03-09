@@ -1,10 +1,10 @@
-const { customers } = require("../models");
+const { customers, users } = require("../models");
 
 module.exports = {
   async store(req, res) {
     const { email_address, password } = req.body;
 
-    const findCustomers = await customers.findOne({ where: { email_address } });
+    const findCustomers = await users.findOne({ where: { email_address } });
 
     if (!findCustomers) {
       return res.status(401).json({ message: "Customer not found" });
@@ -17,7 +17,7 @@ module.exports = {
     findCustomers.password = undefined;
 
     return res.json({
-      name: `${findCustomers.first_name} ${findCustomers.last_name}`,
+      customer: findCustomers,
       access_token: findCustomers.generateToken()
     });
   }

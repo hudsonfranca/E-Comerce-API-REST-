@@ -2,7 +2,7 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable("stock", {
+    return queryInterface.createTable("orders_products", {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
@@ -10,16 +10,23 @@ module.exports = {
         allowNull: false,
         unique: true
       },
-      quantity: {
+      id_orders: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: { model: "orders", key: "id" },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE"
       },
-      id_product: {
+      id_products: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: { model: "products", key: "id" },
         onUpdate: "CASCADE",
         onDelete: "CASCADE"
+      },
+      quantity: {
+        type: Sequelize.INTEGER,
+        allowNull: false
       },
       created_at: {
         allowNull: false,
@@ -33,6 +40,6 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable("stock");
+    return queryInterface.dropTable("orders_products");
   }
 };
