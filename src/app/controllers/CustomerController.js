@@ -1,4 +1,4 @@
-const { customers, users } = require("../models");
+const { customers, users, addresses } = require("../models");
 const sequelize = require("../models").sequelize;
 const Sequelize = require("../models").Sequelize;
 const bcrypt = require("bcrypt");
@@ -24,6 +24,7 @@ module.exports = {
                 {
                   association: "Addresses",
                   attributes: [
+                    "id",
                     "street_address",
                     "city",
                     "zip",
@@ -96,7 +97,8 @@ module.exports = {
       email_address,
       cpf,
       phone_number,
-      password
+      password,
+      customerAddress
     } = req.body;
 
     const findEmail = await users.findOne({
@@ -131,19 +133,25 @@ module.exports = {
           { transaction: t }
         );
 
-        await customers.create(
-          {
-            id: createdUser.id
-          },
-          { transaction: t }
-        );
+        if (createdUser) {
+          await customers.create(
+            {
+              id: createdUser.id
+            },
+            { transaction: t }
+          );
 
-        createdUser.password = undefined;
+          createdUser.password = undefined;
 
-        return {
-          name: `${createdUser.first_name} ${createdUser.last_name}`,
-          access_token: createdUser.generateToken()
-        };
+          await createdUser.createAddresses(customerAddress, {
+            transaction: t
+          });
+
+          return {
+            name: `${createdUser.first_name} ${createdUser.last_name}`,
+            access_token: createdUser.generateToken()
+          };
+        }
       });
 
       return res.status(201).json(response);
@@ -164,10 +172,20 @@ module.exports = {
 
     try {
       const response = await sequelize.transaction(async t => {
-        await users.destroy({
+        const deletedUser = await users.destroy({
           where: { id: findCustomer.id },
           transaction: t
         });
+
+        if (deletedUser) {
+          await addresses.destroy({
+            where: {
+              addressable_type: "users",
+              [Sequelize.Op.and]: { addressable_id: findCustomer.id }
+            },
+            transaction: t
+          });
+        }
       });
 
       res.status(200).send();
@@ -213,6 +231,7 @@ module.exports = {
           }
         );
 
+        updatedCustomer[0].password = undefined;
         return updatedCustomer;
       });
 

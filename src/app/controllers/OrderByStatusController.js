@@ -14,43 +14,43 @@ module.exports = {
                 [Sequelize.Op.like]: `${name}%`
               }
             },
-            attributes: ["id", "status"],
+            attributes: [
+              "id",
+              "id_customers",
+              "id_payment_methods",
+              "status",
+              "amount"
+            ],
             include: [
               {
-                association: "Sale",
+                association: "Products",
+                attributes: ["id", "name", "description", "price", "status"],
+                through: {
+                  attributes: ["quantity"]
+                }
+              },
+              {
+                association: "OrdersAddresse",
                 attributes: [
                   "id",
-                  "id_customers",
-                  "id_payment_methods",
-                  "amount",
-                  "created_at"
-                ],
+                  "street_address",
+                  "city",
+                  "zip",
+                  "country",
+                  "state"
+                ]
+              },
+              {
+                association: "Customers",
+                attributes: ["id"],
                 include: [
                   {
-                    association: "Products",
-                    attributes: ["id", "name", "brand_id", "description"],
-                    through: { attributes: [] }
-                  },
-                  {
-                    association: "Customers",
+                    association: "User",
                     attributes: [
                       "id",
                       "first_name",
                       "last_name",
                       "email_address"
-                    ],
-                    include: [
-                      {
-                        association: "Addresses",
-                        attributes: [
-                          "id",
-                          "street_address",
-                          "city",
-                          "zip",
-                          "country",
-                          "state"
-                        ]
-                      }
                     ]
                   }
                 ]

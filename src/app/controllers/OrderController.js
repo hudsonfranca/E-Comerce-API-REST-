@@ -1,4 +1,6 @@
 const Decimal = require("decimal.js");
+const sequelize = require("../models").sequelize;
+const Sequelize = require("../models").Sequelize;
 const {
   orders,
   payment_methods,
@@ -9,48 +11,58 @@ const {
   addresses
 } = require("../models");
 
-const sequelize = require("../models").sequelize;
-
 module.exports = {
   async index(req, res) {
     try {
       const response = await sequelize.transaction(async t => {
-        const allOrders = await orders.findAndCountAll({
-          attributes: [
-            "id",
-            "id_customers",
-            "id_payment_methods",
-            "status",
-            "amount"
-          ],
-          transaction: t,
-          include: [
-            {
-              association: "Products",
-              attributes: ["id", "name", "description", "price", "status"],
-              through: {
-                attributes: []
-              }
-            },
-            {
-              association: "Customers",
-              attributes: ["id", "first_name", "last_name", "email_address"],
-              include: [
-                {
-                  association: "Addresses",
-                  attributes: [
-                    "id",
-                    "street_address",
-                    "city",
-                    "zip",
-                    "country",
-                    "state"
-                  ]
+        const allOrders = await orders.findAndCountAll(
+          {
+            attributes: [
+              "id",
+              "id_customers",
+              "id_payment_methods",
+              "status",
+              "amount"
+            ],
+            include: [
+              {
+                association: "Products",
+                attributes: ["id", "name", "description", "price", "status"],
+                through: {
+                  attributes: ["quantity"]
                 }
-              ]
-            }
-          ]
-        });
+              },
+              {
+                association: "OrdersAddresse",
+                attributes: [
+                  "id",
+                  "street_address",
+                  "city",
+                  "zip",
+                  "country",
+                  "state"
+                ]
+              },
+              {
+                association: "Customers",
+                attributes: ["id"],
+                include: [
+                  {
+                    association: "User",
+                    attributes: [
+                      "id",
+                      "first_name",
+                      "last_name",
+                      "email_address"
+                    ]
+                  }
+                ]
+              }
+            ],
+            distinct: true
+          },
+          { transaction: t }
+        );
 
         return allOrders;
       });
@@ -81,22 +93,31 @@ module.exports = {
                 association: "Products",
                 attributes: ["id", "name", "description", "price", "status"],
                 through: {
-                  attributes: []
+                  attributes: ["quantity"]
                 }
               },
               {
+                association: "OrdersAddresse",
+                attributes: [
+                  "id",
+                  "street_address",
+                  "city",
+                  "zip",
+                  "country",
+                  "state"
+                ]
+              },
+              {
                 association: "Customers",
-                attributes: ["id", "first_name", "last_name", "email_address"],
+                attributes: ["id"],
                 include: [
                   {
-                    association: "Addresses",
+                    association: "User",
                     attributes: [
                       "id",
-                      "street_address",
-                      "city",
-                      "zip",
-                      "country",
-                      "state"
+                      "first_name",
+                      "last_name",
+                      "email_address"
                     ]
                   }
                 ]
@@ -198,16 +219,7 @@ module.exports = {
             })
           );
 
-          const addressCreated = await orderCreated.createOrdersAddresse(
-            orderAddress
-          );
-
-          console.log("1", addressCreated.addressable_id === orderCreated.id);
-
-          console.log("2", addressCreated.addressable_type);
-
-          const associatedAddressable = await addressCreated.getAddressable();
-          console.log("3", associatedAddressable);
+          await orderCreated.createOrdersAddresse(orderAddress);
 
           if (addProductToOrder) {
             //Clear Cart
@@ -229,59 +241,65 @@ module.exports = {
   async delete(req, res) {
     const { id } = req.params;
 
-    const findSalesHistory = await orders.findByPk(id);
+    const findOrder = await orders.findByPk(id);
 
-    if (!findSalesHistory) {
+    if (!findOrder) {
       res.status(400).json({ error: "This order dos not exist." });
       return;
     }
 
     try {
       const response = await sequelize.transaction(async t => {
-        await orders.destroy({
-          where: { id: findSalesHistory.id },
+        const deletedOrder = await orders.destroy({
+          where: { id: findOrder.id },
           transaction: t
         });
+
+        if (deletedOrder) {
+          await addresses.destroy({
+            where: {
+              addressable_type: "orders",
+              [Sequelize.Op.and]: { addressable_id: findOrder.id }
+            },
+            transaction: t
+          });
+        }
       });
 
       return res.status(200).json();
     } catch (err) {
-      res.status(400).json({ error: "Unable to delete this sale." });
+      res.status(400).json({ error: "Unable to delete this order." });
+      console.log(err);
+      return;
+    }
+  },
+
+  async update(req, res) {
+    const { id } = req.params;
+
+    try {
+      const response = await sequelize.transaction(async t => {
+        const findOrder = await orders.findByPk(id, { transaction: t });
+
+        if (!findOrder) {
+          res.status(400).json({ error: "This order dos not exist." });
+          return;
+        }
+
+        const [lines, updatedOrder] = await orders.update(req.body, {
+          where: { id: findOrder.id },
+          returning: true,
+          transaction: t
+        });
+
+        return updatedOrder;
+      });
+
+      res.status(200).json(response);
+    } catch (err) {
+      res.status(400).json({ error: "Unable to update this order." });
       console.log(err);
       return;
     }
   }
-
-  // async update(req,res){
-  //     const {id} = req.params;
-
-  //  try{
-  //         const response  =  await sequelize.transaction(async(t)=>{
-
-  //             const findSalesHistory = await orders.findByPk(id,{transaction:t});
-
-  //             if(!findSalesHistory){
-  //                  res.status(400).json({error:"This sale dos not exist."})
-  //                  return
-  //             }
-
-  //             const [lines,updatedSalesHistory] = await orders.update(req.body,{
-  //                 where: { id:findSalesHistory.id },
-  //                 returning: true,
-  //                 transaction:t
-  //               });
-
-  //               return updatedSalesHistory;
-
-  //         })
-
-  //         res.status(200).json(response);
-
-  //     }catch(err){
-  //         res.status(400).json({error:"Unable to update this sale."});
-  //         console.log(err);
-  //         return
-  //     }
-
-  // }
 };

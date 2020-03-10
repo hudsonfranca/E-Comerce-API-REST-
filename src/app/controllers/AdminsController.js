@@ -75,10 +75,6 @@ module.exports = {
             {
               association: "Addresses",
               attributes: ["street_address", "city", "zip", "country", "state"]
-            },
-            {
-              association: "Admin",
-              attributes: ["type"]
             }
           ],
           transaction: t
@@ -101,6 +97,7 @@ module.exports = {
       cpf,
       phone_number,
       password,
+      adminAddress,
       type
     } = req.body;
 
@@ -136,20 +133,24 @@ module.exports = {
           { transaction: t }
         );
 
-        await admins.create(
-          {
-            id: createdAdmin.id,
-            type
-          },
-          { transaction: t }
-        );
+        if (createdAdmin) {
+          await admins.create(
+            {
+              id: createdAdmin.id,
+              type
+            },
+            { transaction: t }
+          );
 
-        createdAdmin.password = undefined;
+          createdAdmin.password = undefined;
 
-        return {
-          name: `${createdAdmin.first_name} ${createdAdmin.last_name}`,
-          access_token: createdAdmin.generateToken()
-        };
+          await createdAdmin.createAddresses(adminAddress, { transaction: t });
+
+          return {
+            name: `${createdAdmin.first_name} ${createdAdmin.last_name}`,
+            access_token: createdAdmin.generateToken()
+          };
+        }
       });
 
       return res.status(201).json(response);
@@ -204,7 +205,7 @@ module.exports = {
     const findAdmin = await users.findByPk(id);
 
     if (!findAdmin) {
-      res.status(400).json({ error: "This customer does not exist" });
+      res.status(400).json({ error: "This admin does not exist" });
       return;
     }
 
