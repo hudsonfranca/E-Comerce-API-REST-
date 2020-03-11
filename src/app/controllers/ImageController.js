@@ -13,7 +13,7 @@ module.exports = {
             where: {
               id_product: id
             },
-            attributes: ["id", "url"]
+            attributes: ["id", "id_product", "image", "small", "aspect_ratio"]
           },
           { transaction: t }
         );
@@ -27,49 +27,9 @@ module.exports = {
     return res.status(200).json(response);
   },
   async store(req, res) {
-    const { name, brand_id, description, price, status } = req.body;
+    const { image, small } = req.files;
 
-    const findBrand = await brands.findByPk(brand_id);
-    const findCategorie = await categories.findByPk(req.params.categorie_id);
-
-    if (!findBrand) {
-      res.status(400).json({ error: "This brand not exists" });
-      return;
-    } else if (!findCategorie) {
-      res.status(400).json({ error: "This categorie not exists" });
-      return;
-    } else if (price < 0) {
-      return res.status(400).json({ error: "Price cannot be negative" });
-    }
-
-    try {
-      const response = await sequelize.transaction(async t => {
-        const productCreated = await products.create(
-          {
-            name,
-            brand_id,
-            description,
-            price,
-            status
-          },
-          { transaction: t }
-        );
-
-        await productCreated.addCategories(findCategorie, { transaction: t });
-
-        return productCreated;
-      });
-
-      res.status(201).json(response.id);
-      return;
-    } catch (err) {
-      res.status(400).json({ error: "Unable to register this product." });
-      console.log(err);
-      return;
-    }
-  },
-  async store(req, res) {
-    const file = req.file;
+    const { aspect_ratio } = req.body;
 
     const findProduct = await products.findByPk(req.params.id);
 
@@ -82,8 +42,10 @@ module.exports = {
       const response = await sequelize.transaction(async t => {
         const imageCreated = await images.create(
           {
-            url: file.filename,
-            id_product: findProduct.id
+            image: image[0].filename,
+            small: small[0].filename,
+            id_product: findProduct.id,
+            aspect_ratio
           },
           { transaction: t }
         );
@@ -94,7 +56,7 @@ module.exports = {
       res.status(201).json(response);
       return;
     } catch (err) {
-      res.status(400).json({ error: "Unable to register this product." });
+      res.status(400).json({ error: "Unable to register this image." });
       console.log(err);
       return;
     }
@@ -109,13 +71,22 @@ module.exports = {
       return;
     }
 
-    const imagePath = `${path.resolve(
+    const image = `${path.resolve(
       __dirname,
       "..",
       "..",
       "..",
       "uploads",
-      `${path.basename(findImages.url)}`
+      `${path.basename(findImages.image)}`
+    )}`;
+
+    const small = `${path.resolve(
+      __dirname,
+      "..",
+      "..",
+      "..",
+      "uploads",
+      `${path.basename(findImages.small)}`
     )}`;
 
     try {
@@ -126,7 +97,8 @@ module.exports = {
             transaction: t
           })
           .then(async () => {
-            await fs.unlinkSync(imagePath);
+            await fs.unlinkSync(image);
+            await fs.unlinkSync(small);
           });
       });
 

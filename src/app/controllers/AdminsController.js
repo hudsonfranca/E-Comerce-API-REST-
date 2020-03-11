@@ -47,40 +47,41 @@ module.exports = {
     return res.status(200).json(response);
   },
   async show(req, res) {
-    const { name } = req.query;
+    const { id } = req.params;
     const response = await sequelize.transaction(async t => {
       try {
-        const findAllAdmins = await users.findAll({
-          where: sequelize.where(
-            sequelize.fn(
-              "concat",
-              sequelize.col("first_name"),
-              " ",
-              sequelize.col("last_name")
-            ),
-            {
-              [Sequelize.Op.iLike]: `%${name}%`
-            }
-          ),
-          attributes: [
-            "id",
-            "first_name",
-            "last_name",
-            "email_address",
-            "cpf",
-            "phone_number",
-            "createdAt"
-          ],
+        const findAdmins = await admins.findByPk(id, {
+          attributes: ["id", "type"],
           include: [
             {
-              association: "Addresses",
-              attributes: ["street_address", "city", "zip", "country", "state"]
+              association: "User",
+              attributes: [
+                "first_name",
+                "last_name",
+                "email_address",
+                "cpf",
+                "phone_number",
+                "createdAt"
+              ],
+              include: [
+                {
+                  association: "Addresses",
+                  attributes: [
+                    "street_address",
+                    "city",
+                    "zip",
+                    "country",
+                    "state"
+                  ]
+                }
+              ]
             }
           ],
+
           transaction: t
         });
 
-        return findAllAdmins;
+        return findAdmins;
       } catch (err) {
         console.log(err);
         return res.status(400).json({ err: "error" });

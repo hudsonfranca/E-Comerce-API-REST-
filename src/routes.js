@@ -33,14 +33,14 @@ routes.put("/api/customer/:id/edit", CustomerController.update);
 //...............CUSTOMERS ROUTES..............................
 routes.post("/api/customer", CustomerController.store);
 routes.get("/api/customer", CustomerController.index);
-routes.get("/api/customer/search", CustomerController.show);
+routes.get("/api/customer/:id", CustomerController.show);
 routes.delete("/api/customer/:id", CustomerController.delete);
 routes.put("/api/customer/:id/edit", CustomerController.update);
 
 //...............ADMIN ROUTES..............................
 routes.post("/api/admin", AdminsController.store);
 routes.get("/api/admin", AdminsController.index);
-routes.get("/api/admin/search", AdminsController.show);
+routes.get("/api/admin/:id", AdminsController.show);
 routes.delete("/api/admin/:id", AdminsController.delete);
 routes.put("/api/admin/:id/edit", AdminsController.update);
 
@@ -54,7 +54,10 @@ routes.put(
 //...............IMAGES..............................
 routes.post(
   "/api/product/:id/images",
-  upload.single("photos"),
+  upload.fields([
+    { name: "image", maxCount: 1 },
+    { name: "small", maxCount: 1 }
+  ]),
   ImageController.store
 );
 
@@ -63,7 +66,7 @@ routes.delete("/api/images/:id", ImageController.delete);
 routes.get("/api/product/:id/images", ImageController.show);
 
 //...............PRODUCTS ROUTES..............................
-routes.post("/api/categorie/:categorie_id/products", ProductController.store);
+routes.post("/api/products", ProductController.store);
 routes.delete("/api/products/:id", ProductController.delete);
 routes.put("/api/products/:id/edit", ProductController.update);
 routes.get("/api/products", ProductController.index);

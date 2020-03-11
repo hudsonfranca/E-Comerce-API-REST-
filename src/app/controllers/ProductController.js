@@ -15,7 +15,16 @@ module.exports = {
           {
             attributes: ["id", "name", "description", "price", "status"],
             include: [
-              { association: "Images", attributes: ["url"] },
+              {
+                association: "Images",
+                attributes: [
+                  "id",
+                  "id_product",
+                  "image",
+                  "small",
+                  "aspect_ratio"
+                ]
+              },
               {
                 association: "Brand",
                 attributes: ["id", "name"]
@@ -50,7 +59,16 @@ module.exports = {
           {
             attributes: ["id", "name", "description", "price", "status"],
             include: [
-              { association: "Images", attributes: ["id", "url"] },
+              {
+                association: "Images",
+                attributes: [
+                  "id",
+                  "id_product",
+                  "image",
+                  "small",
+                  "aspect_ratio"
+                ]
+              },
               {
                 association: "Brand",
                 attributes: ["id", "name"]
@@ -75,10 +93,17 @@ module.exports = {
     }
   },
   async store(req, res) {
-    const { name, brand_id, description, price, status } = req.body;
+    const {
+      name,
+      brand_id,
+      description,
+      price,
+      status,
+      categorie_id
+    } = req.body;
 
     const findBrand = await brands.findByPk(brand_id);
-    const findCategorie = await categories.findByPk(req.params.categorie_id);
+    const findCategorie = await categories.findByPk(categorie_id);
 
     if (!findBrand) {
       res.status(400).json({ error: "This brand not exists" });
