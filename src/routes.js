@@ -110,6 +110,7 @@ routes.post("/api/sessions", SessionController.store);
 routes.post("/api/product/:id/cart", authMiddleware, CartController.store);
 routes.get("/api/cart", authMiddleware, CartController.index);
 routes.delete("/api/product/:id/cart", authMiddleware, CartController.delete);
+routes.put("/api/product/:id/cart", authMiddleware, CartController.update);
 
 //...............FAVORITES ROUTES..............................
 routes.post(

@@ -1,5 +1,5 @@
-const { customers, users } = require("../models");
-const { addresses } = require("../models");
+const { customers, users, addresses } = require("../models");
+
 const sequelize = require("../models").sequelize;
 
 module.exports = {

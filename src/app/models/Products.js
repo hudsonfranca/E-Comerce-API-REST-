@@ -60,6 +60,11 @@ module.exports = (sequelize, DataTypes) => {
       as: "ProductsOrders"
     });
 
+    products.hasMany(models.cart_products, {
+      foreignKey: "id_product",
+      as: "Cart_Products"
+    });
+
     products.hasMany(models.images, { foreignKey: "id_product", as: "Images" });
 
     products.hasOne(models.stock, { foreignKey: "id_product", as: "Stock" });

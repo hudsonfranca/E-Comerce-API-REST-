@@ -1,5 +1,5 @@
-const { stock } = require("../models");
-const { products } = require("../models");
+const { stock, products } = require("../models");
+
 const sequelize = require("../models").sequelize;
 
 module.exports = {
@@ -78,6 +78,16 @@ module.exports = {
           defaults: { quantity },
           transaction: t
         });
+
+        if (stockCreated) {
+          await products.update(
+            { status: true },
+            {
+              where: { id: findProduct.id },
+              transaction: t
+            }
+          );
+        }
 
         return stockCreated;
       });

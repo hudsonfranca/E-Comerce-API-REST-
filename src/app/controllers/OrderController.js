@@ -8,7 +8,8 @@ const {
   customers,
   products,
   carts,
-  addresses
+  addresses,
+  stock
 } = require("../models");
 
 module.exports = {
@@ -28,6 +29,18 @@ module.exports = {
               {
                 association: "Products",
                 attributes: ["id", "name", "description", "price", "status"],
+                include: [
+                  {
+                    association: "Images",
+                    attributes: [
+                      "id",
+                      "id_product",
+                      "image",
+                      "small",
+                      "aspect_ratio"
+                    ]
+                  }
+                ],
                 through: {
                   attributes: ["quantity"]
                 }
@@ -138,7 +151,7 @@ module.exports = {
     }
   },
   async store(req, res) {
-    const { id_payment_methods, status, quantity, orderAddress } = req.body;
+    const { id_payment_methods, status, orderAddress } = req.body;
 
     const findCustomer = await customers.findByPk(req.userId);
     const findPaymentMethods = await payment_methods.findByPk(
@@ -163,7 +176,7 @@ module.exports = {
             association: "Products",
             attributes: ["id", "name", "description", "price", "status"],
             through: {
-              attributes: []
+              attributes: ["quantity"]
             }
           }
         });
@@ -178,11 +191,7 @@ module.exports = {
         });
 
         const amount = validProducts.reduce((prevVal, elem) => {
-          const productQuantity = quantity.filter(product => {
-            return elem.id === product.id;
-          });
-
-          const priceByQuantity = new Decimal(productQuantity[0].qtd).mul(
+          const priceByQuantity = new Decimal(elem.cart_products.quantity).mul(
             elem.price
           );
 
@@ -204,18 +213,46 @@ module.exports = {
             validProducts.map(async product => {
               let findProduct = await products.findByPk(product.id);
 
-              const productQuantity = quantity.filter(product => {
-                return findProduct.id === product.id;
-              });
-
-              await orders_products.create(
+              const ordersProduct = await orders_products.create(
                 {
                   id_orders: orderCreated.id,
                   id_products: findProduct.id,
-                  quantity: productQuantity[0].qtd
+                  quantity: product.cart_products.quantity
                 },
                 { transaction: t }
               );
+
+              //Update Stock
+              if (ordersProduct) {
+                const findStock = await stock.findOne({
+                  where: { id_product: findProduct.id }
+                });
+
+                if (findStock) {
+                  const newQuantityStock =
+                    findStock.quantity - product.cart_products.quantity;
+
+                  if (newQuantityStock <= 0) {
+                    await products.update(
+                      { status: false },
+                      {
+                        where: { id: findProduct.id },
+                        returning: true,
+                        transaction: t
+                      }
+                    );
+                  } else {
+                    await stock.update(
+                      { quantity: newQuantityStock },
+                      {
+                        where: { id_product: findProduct.id },
+                        returning: true,
+                        transaction: t
+                      }
+                    );
+                  }
+                }
+              }
             })
           );
 

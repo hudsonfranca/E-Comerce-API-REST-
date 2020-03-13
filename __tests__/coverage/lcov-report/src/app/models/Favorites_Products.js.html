@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Code coverage report for src/app/models/Carts.js</title>
+    <title>Code coverage report for src/app/models/Favorites_Products.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="..\..\..\prettify.css" />
     <link rel="stylesheet" href="..\..\..\base.css" />
@@ -16,13 +16,13 @@
 <div class='wrapper'>
   <div class='pad1'>
     <h1>
-      <a href="..\..\..\index.html">All files</a> / <a href="index.html">src/app/models</a> Carts.js
+      <a href="..\..\..\index.html">All files</a> / <a href="index.html">src/app/models</a> Favorites_Products.js
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>6/6</span>
+        <span class='fraction'>4/4</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
@@ -37,7 +37,7 @@
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>6/6</span>
+        <span class='fraction'>4/4</span>
       </div>
     </div>
     <p class="quiet">
@@ -61,8 +61,7 @@
 <a name='L13'></a><a href='#L13'>13</a>
 <a name='L14'></a><a href='#L14'>14</a>
 <a name='L15'></a><a href='#L15'>15</a>
-<a name='L16'></a><a href='#L16'>16</a>
-<a name='L17'></a><a href='#L17'>17</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L16'></a><a href='#L16'>16</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -73,28 +72,26 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">&nbsp;
-module.exports = (sequelize,DataTypes)=&gt;{
-    const carts = sequelize.define("carts",{
-        id: { 
-            type: DataTypes.INTEGER,
-            primaryKey: true,
-            autoIncrement: true
-          } 
-    })
-&nbsp;
-    carts.associate = function(models) {
-        carts.belongsToMany(models.products,{foreignKey:'id_cart',through:'cart_products',as:'Products'});
-        carts.belongsTo(models.customers,{foreignKey:'id_customers',as:'customers'});
-    }
-&nbsp;
-    return carts;
-}</pre></td></tr>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">"use strict";
+module.exports = (sequelize, DataTypes) =&gt; {
+  const Favorites_Products = sequelize.define(
+    "Favorites_Products",
+    {
+      id_favorites: DataTypes.INTEGER,
+      id_products: DataTypes.INTEGER
+    },
+    {}
+  );
+  Favorites_Products.associate = function(models) {
+    // associations can be defined here
+  };
+  return Favorites_Products;
+};
+&nbsp;</pre></td></tr>
 </table></pre>
 <div class='push'></div><!-- for sticky footer -->
 </div><!-- /wrapper -->

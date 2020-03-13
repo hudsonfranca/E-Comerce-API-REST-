@@ -80,92 +80,81 @@
 <a name='L32'></a><a href='#L32'>32</a>
 <a name='L33'></a><a href='#L33'>33</a>
 <a name='L34'></a><a href='#L34'>34</a>
-<a name='L35'></a><a href='#L35'>35</a>
-<a name='L36'></a><a href='#L36'>36</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L35'></a><a href='#L35'>35</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const jwt = require('jsonwebtoken');
-const {promisify} = require('util')
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const jwt = require("jsonwebtoken");
+const { promisify } = require("util");
 &nbsp;
-module.exports = async (req,res,next)=&gt;{
-    const authHeader = req.headers.authorization;
+module.exports = async (req, res, next) =&gt; {
+  const authHeader = req.headers.authorization;
 &nbsp;
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (!authHeader) {
+<span class="cstat-no" title="statement not covered" >    return res.status(401).json({ error: "Token not provided" });</span>
+  }
 &nbsp;
-    <span class="missing-if-branch" title="if path not taken" >I</span>if(!authHeader){
-<span class="cstat-no" title="statement not covered" >        return res.status(401).json({error:"Token not provided"})</span>
-    }
+  const parts = authHeader.split(" ");
 &nbsp;
-    const parts = authHeader.split(' ');
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (!parts.length === 2) {
+<span class="cstat-no" title="statement not covered" >    return res.status(401).json({ error: "Token error" });</span>
+  }
 &nbsp;
-   <span class="missing-if-branch" title="if path not taken" >I</span>if(!parts.length === 2){
-<span class="cstat-no" title="statement not covered" >    return res.status(401).json({error:"Token error"})</span>
-   }
+  const [bearer, token] = parts;
 &nbsp;
-   const [bearer,token] = parts;
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (!/^Bearer$/i.test(bearer)) {
+<span class="cstat-no" title="statement not covered" >    return res.status(401).send({ error: "Token malformatted" });</span>
+  }
 &nbsp;
-   <span class="missing-if-branch" title="if path not taken" >I</span>if(!/^Bearer$/i.test(bearer)){
-<span class="cstat-no" title="statement not covered" >       return res.status(401).send({error:"Token malformatted"})</span>
-   }
+  try {
+    const decoded = await promisify(jwt.verify)(token, process.env.APP_SECRET);
 &nbsp;
-    try{
-        const decoded = await promisify(jwt.verify)(token,process.env.APP_SECRET)
+    req.userId = decoded.id;
 &nbsp;
-        req.userId = decoded.id
+    return next();
+  } catch (err) {
+<span class="cstat-no" title="statement not covered" >    return res.status(401).json({ msg: "Token invalid" });</span>
+  }
 &nbsp;
-        return next()
-    }catch(err){   
-<span class="cstat-no" title="statement not covered" >        return res.status(401).json({msg:"Token invalid"})</span>
-    }
-&nbsp;
-//desestruturação
-    
-}</pre></td></tr>
+  //desestruturação
+};
+&nbsp;</pre></td></tr>
 </table></pre>
 <div class='push'></div><!-- for sticky footer -->
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-<<<<<<< HEAD
-<<<<<<< HEAD
-  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Thu Dec 05 2019 18:47:54 GMT-0300 (GMT-03:00)
-=======
-  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Mon Dec 09 2019 23:34:20 GMT-0300 (GMT-03:00)
->>>>>>> Dev
-=======
-  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Mon Dec 09 2019 23:34:20 GMT-0300 (GMT-03:00)
->>>>>>> Dev
+  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Thu Mar 12 2020 10:19:13 GMT-0300 (GMT-03:00)
 </div>
 </div>
 <script src="..\..\..\prettify.js"></script>

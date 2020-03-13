@@ -1,7 +1,7 @@
-const { carts } = require("../models");
-const { products } = require("../models");
-const { customers } = require("../models");
+const { carts, cart_products, products, customers } = require("../models");
+
 const sequelize = require("../models").sequelize;
+const Sequelize = require("../models").Sequelize;
 
 module.exports = {
   async index(req, res) {
@@ -24,11 +24,17 @@ module.exports = {
 
             include: {
               association: "Images",
-              attributes: ["url"],
+              attributes: [
+                "id",
+                "id_product",
+                "image",
+                "small",
+                "aspect_ratio"
+              ],
               distinct: true
             },
             through: {
-              attributes: []
+              attributes: ["quantity"]
             }
           }
         });
@@ -49,6 +55,7 @@ module.exports = {
   },
   async store(req, res) {
     const { id } = req.params;
+    const { quantity } = req.body;
 
     const findProduct = await products.findByPk(id);
 
@@ -71,7 +78,14 @@ module.exports = {
           transaction: t
         });
 
-        await cartCreated.addProducts(findProduct, { transaction: t });
+        await cart_products.create(
+          {
+            id_cart: cartCreated.id,
+            id_product: findProduct.id,
+            quantity
+          },
+          { transaction: t }
+        );
 
         return cartCreated;
       });
@@ -105,6 +119,45 @@ module.exports = {
     } catch (err) {
       console.log(err);
       return res.status(400).json({ error: "Unable to delete this product." });
+    }
+  },
+  async update(req, res) {
+    const { id } = req.params;
+
+    const findProduct = await products.findByPk(id);
+
+    if (!findProduct) {
+      return res.status(400).json({ error: "This product does not exist." });
+    }
+
+    const findCart = await carts.findOne({
+      where: { id_customers: req.userId }
+    });
+
+    try {
+      const response = await sequelize.transaction(async t => {
+        const [lines, updatedCartProducts] = await cart_products.update(
+          req.body,
+          {
+            where: {
+              id_cart: findCart.id,
+              [Sequelize.Op.and]: { id_product: findProduct.id }
+            },
+            returning: true,
+            transaction: t
+          }
+        );
+
+        return updatedCartProducts;
+      });
+
+      res.status(200).json(response);
+
+      return;
+    } catch (err) {
+      res.status(400).json({ error: "Unable to update this cart." });
+      console.log(err);
+      return;
     }
   }
 };
