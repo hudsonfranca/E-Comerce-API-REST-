@@ -6,6 +6,7 @@ const sequelize = require("../models").sequelize;
 const Sequelize = require("../models").Sequelize;
 const fs = require("fs");
 const path = require("path");
+const Decimal = require("decimal.js");
 
 module.exports = {
   async index(req, res) {

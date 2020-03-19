@@ -1,7 +1,7 @@
 const routes = require("express").Router();
 const CustomerController = require("./app/controllers/CustomerController");
 const AdminsController = require("./app/controllers/AdminsController");
-
+const SearchProductController = require("./app/controllers/SearchProductController");
 const ProductController = require("./app/controllers/ProductController");
 const AddressesController = require("./app/controllers/AddressesController");
 const BrandController = require("./app/controllers/BrandController");
@@ -71,6 +71,7 @@ routes.delete("/api/products/:id", ProductController.delete);
 routes.put("/api/products/:id/edit", ProductController.update);
 routes.get("/api/products", ProductController.index);
 routes.get("/api/products/:id", ProductController.show);
+routes.get("/api/find/product", SearchProductController.index);
 
 //...............ADDRESSES ROUTES..............................
 routes.post("/api/user/:user_id/addresses", AddressesController.store);
