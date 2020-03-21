@@ -1,12 +1,13 @@
 const { customers, users, addresses } = require("../models");
 
 const sequelize = require("../models").sequelize;
+const Sequelize = require("../models").Sequelize;
 
 module.exports = {
   async index(req, res) {
     const { user_id } = req.params;
 
-    const findCustomer = await customers.findByPk(user_id);
+    const findCustomer = await users.findByPk(user_id);
 
     if (!findCustomer) {
       res.status(400).json({ error: "This customer not exists" });
@@ -15,7 +16,11 @@ module.exports = {
 
     try {
       const response = await sequelize.transaction(async t => {
-        const findAddresses = await findCustomer.getAddresses({
+        const findAddresses = await addresses.findOne({
+          where: {
+            addressable_type: "users",
+            [Sequelize.Op.and]: { addressable_id: findCustomer.id }
+          },
           transaction: t,
           attributes: [
             "id",
@@ -23,8 +28,7 @@ module.exports = {
             "city",
             "zip",
             "country",
-            "state",
-            "id_customers"
+            "state"
           ]
         });
 

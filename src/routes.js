@@ -13,7 +13,6 @@ const PaymentMethodsController = require("./app/controllers/PaymentMethodsContro
 const FavoritesController = require("./app/controllers/FavoritesController");
 const OrderController = require("./app/controllers/OrderController");
 const OrderByStatusController = require("./app/controllers/OrderByStatusController");
-const CustomerPageController = require("./app/controllers/CustomerPageController");
 const ImageController = require("./app/controllers/ImageController");
 const OrdersPageController = require("./app/controllers/OrdersPageController");
 const authMiddleware = require("./app/middleware/auth");
@@ -33,7 +32,7 @@ routes.put("/api/customer/:id/edit", CustomerController.update);
 //...............CUSTOMERS ROUTES..............................
 routes.post("/api/customer", CustomerController.store);
 routes.get("/api/customer", CustomerController.index);
-routes.get("/api/customer/:id", CustomerController.show);
+routes.get("/api/customer/:id/show", CustomerController.show);
 routes.delete("/api/customer/:id", CustomerController.delete);
 routes.put("/api/customer/:id/edit", CustomerController.update);
 
@@ -43,13 +42,6 @@ routes.get("/api/admin", AdminsController.index);
 routes.get("/api/admin/:id", AdminsController.show);
 routes.delete("/api/admin/:id", AdminsController.delete);
 routes.put("/api/admin/:id/edit", AdminsController.update);
-
-//...............CUSTOMERS FRONT END ADMIN ROUTES..............................
-routes.get("/api/customer/:id", CustomerPageController.show);
-routes.put(
-  "/api/customer/:id_customer/addresses/:id_addresses/edit",
-  CustomerPageController.update
-);
 
 //...............IMAGES..............................
 routes.post(
@@ -75,7 +67,7 @@ routes.get("/api/find/product", SearchProductController.index);
 
 //...............ADDRESSES ROUTES..............................
 routes.post("/api/user/:user_id/addresses", AddressesController.store);
-routes.get("/api/customer/:customer_id/addresses", AddressesController.index);
+routes.get("/api/customer/:user_id/addresses", AddressesController.index);
 routes.delete("/api/addresses/:id", AddressesController.delete);
 routes.put("/api/addresses/:id/edit", AddressesController.update);
 
@@ -128,14 +120,10 @@ routes.delete(
 
 //...............ORDERS ROUTES..............................
 routes.post("/api/orders", authMiddleware, OrderController.store);
-routes.get("/api/orders/index", authMiddleware, OrderController.index);
-routes.delete("/api/orders/:id", authMiddleware, OrderController.delete);
-routes.get("/api/orders/:id/show", authMiddleware, OrderController.show);
-routes.get(
-  "/api/orders/status/:name",
-  authMiddleware,
-  OrderByStatusController.show
-);
+routes.get("/api/orders/index", OrderController.index);
+routes.delete("/api/orders/:id", OrderController.delete);
+routes.get("/api/orders/:id/show", OrderController.show);
+routes.get("/api/orders/status/:name", OrderByStatusController.show);
 routes.put("/api/order/:id/edit", OrderController.update);
 
 module.exports = routes;

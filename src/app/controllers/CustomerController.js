@@ -5,10 +5,14 @@ const bcrypt = require("bcrypt");
 
 module.exports = {
   async index(req, res) {
+    const { offset, limit } = req.query;
     const response = await sequelize.transaction(async t => {
       try {
-        const findAllCustomer = await customers.findAll({
+        const findAllCustomer = await customers.findAndCountAll({
+          offset,
+          limit,
           attributes: ["id"],
+          distinct: true,
           include: [
             {
               association: "User",
@@ -68,6 +72,7 @@ module.exports = {
                 {
                   association: "Addresses",
                   attributes: [
+                    "id",
                     "street_address",
                     "city",
                     "zip",
@@ -201,7 +206,7 @@ module.exports = {
 
   async update(req, res) {
     const { id } = req.params;
-
+    const data = req.body;
     async function hashPassword() {
       let data = req.body;
 
@@ -233,6 +238,17 @@ module.exports = {
         );
 
         updatedCustomer[0].password = undefined;
+
+        if (updatedCustomer) {
+          const [lines, updatedAddress] = await addresses.update(data, {
+            where: {
+              addressable_type: "users",
+              [Sequelize.Op.and]: { addressable_id: updatedCustomer[0].id }
+            },
+            returning: true,
+            transaction: t
+          });
+        }
         return updatedCustomer;
       });
 

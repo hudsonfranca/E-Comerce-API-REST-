@@ -37,9 +37,12 @@ module.exports = {
     }
   },
   async index(req, res) {
+    const { offset, limit } = req.query;
     try {
       const response = await sequelize.transaction(async t => {
-        const allstock = await stock.findAll({
+        const allstock = await stock.findAndCountAll({
+          offset,
+          limit,
           attributes: ["id", "quantity", "id_product"],
           include: [
             {

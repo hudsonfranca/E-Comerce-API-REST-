@@ -23,7 +23,8 @@ module.exports = {
               "id_customers",
               "id_payment_methods",
               "status",
-              "amount"
+              "amount",
+              "created_at"
             ],
             include: [
               {
@@ -99,7 +100,8 @@ module.exports = {
               "id_customers",
               "id_payment_methods",
               "status",
-              "amount"
+              "amount",
+              "created_at"
             ],
             include: [
               {
