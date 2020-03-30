@@ -11,17 +11,6 @@ module.exports = (sequelize, DataTypes) => {
         notEmpty: true
       }
     },
-    small: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      get: function() {
-        return "http://localhost:3333/files/" + this.getDataValue("small");
-      },
-      validate: {
-        notNull: true,
-        notEmpty: true
-      }
-    },
     aspect_ratio: {
       type: DataTypes.STRING,
       allowNull: false,

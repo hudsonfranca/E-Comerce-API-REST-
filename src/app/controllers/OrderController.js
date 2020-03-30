@@ -14,10 +14,13 @@ const {
 
 module.exports = {
   async index(req, res) {
+    const { offset, limit } = req.query;
     try {
       const response = await sequelize.transaction(async t => {
         const allOrders = await orders.findAndCountAll(
           {
+            offset,
+            limit,
             attributes: [
               "id",
               "id_customers",
@@ -33,13 +36,7 @@ module.exports = {
                 include: [
                   {
                     association: "Images",
-                    attributes: [
-                      "id",
-                      "id_product",
-                      "image",
-                      "small",
-                      "aspect_ratio"
-                    ]
+                    attributes: ["id", "id_product", "image", "aspect_ratio"]
                   }
                 ],
                 through: {

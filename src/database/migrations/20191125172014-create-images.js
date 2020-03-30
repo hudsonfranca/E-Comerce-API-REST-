@@ -21,10 +21,6 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      small: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
       aspect_ratio: {
         type: Sequelize.STRING,
         allowNull: false

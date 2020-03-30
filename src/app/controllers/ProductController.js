@@ -10,21 +10,19 @@ const Decimal = require("decimal.js");
 
 module.exports = {
   async index(req, res) {
+    const { offset, limit } = req.query;
     try {
       const response = await sequelize.transaction(async t => {
-        const allProducts = await products.findAll(
+        const allProducts = await products.findAndCountAll(
           {
+            offset,
+            limit,
+            distinct: true,
             attributes: ["id", "name", "description", "price", "status"],
             include: [
               {
                 association: "Images",
-                attributes: [
-                  "id",
-                  "id_product",
-                  "image",
-                  "small",
-                  "aspect_ratio"
-                ]
+                attributes: ["id", "id_product", "image", "aspect_ratio"]
               },
               {
                 association: "Brand",
@@ -62,13 +60,7 @@ module.exports = {
             include: [
               {
                 association: "Images",
-                attributes: [
-                  "id",
-                  "id_product",
-                  "image",
-                  "small",
-                  "aspect_ratio"
-                ]
+                attributes: ["id", "id_product", "image", "aspect_ratio"]
               },
               {
                 association: "Brand",
@@ -154,8 +146,7 @@ module.exports = {
 
     const imagesPath = await images
       .findAll({
-        where: { id_product: findProduct.id },
-        attributes: ["url"]
+        where: { id_product: findProduct.id }
       })
       .then(url => {
         const pathArr = url.reduce(function(prevVal, elem) {
@@ -168,7 +159,7 @@ module.exports = {
                 "..",
                 "..",
                 "uploads",
-                `${path.basename(elem.url)}`
+                `${path.basename(elem.image)}`
               )}`
             }
           ];

@@ -24,13 +24,7 @@ module.exports = {
 
             include: {
               association: "Images",
-              attributes: [
-                "id",
-                "id_product",
-                "image",
-                "small",
-                "aspect_ratio"
-              ],
+              attributes: ["id", "id_product", "image", "aspect_ratio"],
               distinct: true
             },
             through: {

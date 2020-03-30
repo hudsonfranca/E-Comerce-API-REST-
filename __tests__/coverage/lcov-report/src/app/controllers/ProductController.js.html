@@ -20,9 +20,9 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">10.34% </span>
+        <span class="strong">11.24% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>9/87</span>
+        <span class='fraction'>10/89</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">0% </span>
@@ -35,9 +35,9 @@
         <span class='fraction'>0/15</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">10.34% </span>
+        <span class="strong">11.24% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>9/87</span>
+        <span class='fraction'>10/89</span>
       </div>
     </div>
     <p class="quiet">
@@ -289,15 +289,8 @@
 <a name='L241'></a><a href='#L241'>241</a>
 <a name='L242'></a><a href='#L242'>242</a>
 <a name='L243'></a><a href='#L243'>243</a>
-<a name='L244'></a><a href='#L244'>244</a>
-<a name='L245'></a><a href='#L245'>245</a>
-<a name='L246'></a><a href='#L246'>246</a>
-<a name='L247'></a><a href='#L247'>247</a>
-<a name='L248'></a><a href='#L248'>248</a>
-<a name='L249'></a><a href='#L249'>249</a>
-<a name='L250'></a><a href='#L250'>250</a>
-<a name='L251'></a><a href='#L251'>251</a>
-<a name='L252'></a><a href='#L252'>252</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L244'></a><a href='#L244'>244</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -311,9 +304,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -354,12 +345,6 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -451,7 +436,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -556,24 +540,23 @@ const sequelize = require("../models").sequelize;
 const Sequelize = require("../models").Sequelize;
 const fs = require("fs");
 const path = require("path");
+const Decimal = require("decimal.js");
 &nbsp;
 module.exports = {
 <span class="fstat-no" title="function not covered" >  as</span>ync index(req, res) {
+    const { offset, limit } = <span class="cstat-no" title="statement not covered" >req.query;</span>
 <span class="cstat-no" title="statement not covered" >    try {</span>
       const response = <span class="cstat-no" title="statement not covered" >await sequelize.transaction(<span class="fstat-no" title="function not covered" >as</span>ync t =&gt; {</span>
-        const allProducts = <span class="cstat-no" title="statement not covered" >await products.findAll(</span>
+        const allProducts = <span class="cstat-no" title="statement not covered" >await products.findAndCountAll(</span>
           {
+            offset,
+            limit,
+            distinct: true,
             attributes: ["id", "name", "description", "price", "status"],
             include: [
               {
                 association: "Images",
-                attributes: [
-                  "id",
-                  "id_product",
-                  "image",
-                  "small",
-                  "aspect_ratio"
-                ]
+                attributes: ["id", "id_product", "image", "aspect_ratio"]
               },
               {
                 association: "Brand",
@@ -611,13 +594,7 @@ module.exports = {
             include: [
               {
                 association: "Images",
-                attributes: [
-                  "id",
-                  "id_product",
-                  "image",
-                  "small",
-                  "aspect_ratio"
-                ]
+                attributes: ["id", "id_product", "image", "aspect_ratio"]
               },
               {
                 association: "Brand",
@@ -703,8 +680,7 @@ module.exports = {
 &nbsp;
     const imagesPath = <span class="cstat-no" title="statement not covered" >await images</span>
       .findAll({
-        where: { id_product: findProduct.id },
-        attributes: ["url"]
+        where: { id_product: findProduct.id }
       })
       .then(<span class="fstat-no" title="function not covered" >ur</span>l =&gt; {
         const pathArr = <span class="cstat-no" title="statement not covered" >url.reduce(<span class="fstat-no" title="function not covered" >fu</span>nction(prevVal, elem) {</span>
@@ -717,7 +693,7 @@ module.exports = {
                 "..",
                 "..",
                 "uploads",
-                `${path.basename(elem.url)}`
+                `${path.basename(elem.image)}`
               )}`
             }
           ];
@@ -805,7 +781,7 @@ module.exports = {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Thu Mar 12 2020 10:19:13 GMT-0300 (GMT-03:00)
+  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Thu Mar 26 2020 16:25:02 GMT-0300 (GMT-03:00)
 </div>
 </div>
 <script src="..\..\..\prettify.js"></script>

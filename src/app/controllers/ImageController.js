@@ -13,7 +13,7 @@ module.exports = {
             where: {
               id_product: id
             },
-            attributes: ["id", "id_product", "image", "small", "aspect_ratio"]
+            attributes: ["id", "id_product", "image", "aspect_ratio"]
           },
           { transaction: t }
         );
@@ -27,9 +27,9 @@ module.exports = {
     return res.status(200).json(response);
   },
   async store(req, res) {
-    const { image, small } = req.files;
+    const file = req.file;
 
-    const { aspect_ratio } = req.body;
+    const { aspect_ratio } = req.params;
 
     const findProduct = await products.findByPk(req.params.id);
 
@@ -42,8 +42,7 @@ module.exports = {
       const response = await sequelize.transaction(async t => {
         const imageCreated = await images.create(
           {
-            image: image[0].filename,
-            small: small[0].filename,
+            image: file.filename,
             id_product: findProduct.id,
             aspect_ratio
           },
@@ -80,15 +79,6 @@ module.exports = {
       `${path.basename(findImages.image)}`
     )}`;
 
-    const small = `${path.resolve(
-      __dirname,
-      "..",
-      "..",
-      "..",
-      "uploads",
-      `${path.basename(findImages.small)}`
-    )}`;
-
     try {
       await sequelize.transaction(async t => {
         await images
@@ -98,7 +88,6 @@ module.exports = {
           })
           .then(async () => {
             await fs.unlinkSync(image);
-            await fs.unlinkSync(small);
           });
       });
 

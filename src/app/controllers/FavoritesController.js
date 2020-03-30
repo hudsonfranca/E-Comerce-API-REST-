@@ -23,7 +23,7 @@ module.exports = {
             attributes: ["id", "name", "description", "price", "status"],
             include: {
               association: "Images",
-              attributes: ["id", "id_product", "image", "small", "aspect_ratio"]
+              attributes: ["id", "id_product", "image", "aspect_ratio"]
             },
             through: {
               attributes: []

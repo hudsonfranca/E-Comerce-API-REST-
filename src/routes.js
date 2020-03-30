@@ -45,11 +45,8 @@ routes.put("/api/admin/:id/edit", AdminsController.update);
 
 //...............IMAGES..............................
 routes.post(
-  "/api/product/:id/images",
-  upload.fields([
-    { name: "image", maxCount: 1 },
-    { name: "small", maxCount: 1 }
-  ]),
+  "/api/product/:id/images/:aspect_ratio",
+  upload.single("image"),
   ImageController.store
 );
 
