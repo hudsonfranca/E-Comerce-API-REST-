@@ -154,7 +154,7 @@ module.exports = {
           });
 
           return {
-            name: `${createdUser.first_name} ${createdUser.last_name}`,
+            user: createdUser,
             access_token: createdUser.generateToken()
           };
         }

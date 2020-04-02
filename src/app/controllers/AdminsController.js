@@ -148,7 +148,7 @@ module.exports = {
           await createdAdmin.createAddresses(adminAddress, { transaction: t });
 
           return {
-            name: `${createdAdmin.first_name} ${createdAdmin.last_name}`,
+            user: createdAdmin,
             access_token: createdAdmin.generateToken()
           };
         }
