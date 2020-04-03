@@ -1,7 +1,5 @@
-const { products } = require("../models");
-const { brands } = require("../models");
-const { categories } = require("../models");
-const { images } = require("../models");
+const { products, brands, categories, images, stock } = require("../models");
+
 const sequelize = require("../models").sequelize;
 const Sequelize = require("../models").Sequelize;
 const fs = require("fs");
@@ -10,7 +8,7 @@ const Decimal = require("decimal.js");
 
 module.exports = {
   async index(req, res) {
-    const { offset, limit } = req.query;
+    const { offset, limit } = req.params;
     try {
       const response = await sequelize.transaction(async t => {
         const allProducts = await products.findAndCountAll(
@@ -92,7 +90,8 @@ module.exports = {
       description,
       price,
       status,
-      categorie_id
+      categorie_id,
+      quantity
     } = req.body;
 
     const findBrand = await brands.findByPk(brand_id);
@@ -121,7 +120,14 @@ module.exports = {
           { transaction: t }
         );
 
-        await productCreated.addCategories(findCategorie, { transaction: t });
+        if (productCreated) {
+          await productCreated.addCategories(findCategorie, { transaction: t });
+          const [stockCreated] = await stock.findOrCreate({
+            where: { id_product: productCreated.id },
+            defaults: { quantity },
+            transaction: t
+          });
+        }
 
         return productCreated;
       });

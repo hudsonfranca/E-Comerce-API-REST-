@@ -58,7 +58,7 @@ routes.get("/api/product/:id/images", ImageController.show);
 routes.post("/api/products", ProductController.store);
 routes.delete("/api/products/:id", ProductController.delete);
 routes.put("/api/products/:id/edit", ProductController.update);
-routes.get("/api/products", ProductController.index);
+routes.get("/api/products/:offset/:limit", ProductController.index);
 routes.get("/api/products/:id", ProductController.show);
 routes.get("/api/find/product", SearchProductController.index);
 
@@ -83,7 +83,7 @@ routes.put("/api/categories/:id/edit", CategorieController.update);
 //...............STOCK ROUTES..............................
 routes.post("/api/product/:id/stock", StockController.store);
 routes.get("/api/product/:id/stock", StockController.show);
-routes.get("/api/stock", StockController.index);
+routes.get("/api/stock/:offset/:limit", StockController.index);
 routes.delete("/api/stock/:id", StockController.delete);
 routes.put("/api/stock/:id/edit", StockController.update);
 

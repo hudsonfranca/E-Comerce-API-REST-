@@ -6,25 +6,21 @@ module.exports = {
   async show(req, res) {
     const { id } = req.params;
 
-    const findProduct = await products.findByPk(id);
-
-    if (!findProduct) {
-      res.status(400).json({ error: "This product does not exist." });
-      return;
-    }
-
     try {
       const response = await sequelize.transaction(async t => {
-        const findStock = await findProduct.getStock({
-          attributes: ["id", "quantity", "id_product"],
-          include: [
-            {
-              association: "Products",
-              attributes: ["name"]
-            }
-          ],
-          transaction: t
-        });
+        const findStock = await products.findOne(
+          {
+            where: { id },
+            attributes: ["name"],
+            include: [
+              {
+                association: "Stock",
+                attributes: ["id", "quantity", "id_product"]
+              }
+            ]
+          },
+          { transaction: t }
+        );
 
         return findStock;
       });
@@ -37,21 +33,24 @@ module.exports = {
     }
   },
   async index(req, res) {
-    const { offset, limit } = req.query;
+    const { offset, limit } = req.params;
     try {
       const response = await sequelize.transaction(async t => {
-        const allstock = await stock.findAndCountAll({
-          offset,
-          limit,
-          attributes: ["id", "quantity", "id_product"],
-          include: [
-            {
-              association: "Products",
-              attributes: ["name"]
-            }
-          ],
-          transaction: t
-        });
+        const allstock = await products.findAndCountAll(
+          {
+            offset,
+            limit,
+            distinct: true,
+            attributes: ["name"],
+            include: [
+              {
+                association: "Stock",
+                attributes: ["id", "quantity", "id_product"]
+              }
+            ]
+          },
+          { transaction: t }
+        );
 
         return allstock;
       });
