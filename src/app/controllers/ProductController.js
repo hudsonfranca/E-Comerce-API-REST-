@@ -8,9 +8,9 @@ const Decimal = require("decimal.js");
 
 module.exports = {
   async index(req, res) {
-    const { offset, limit } = req.params;
+    const { offset, limit } = req.query;
     try {
-      const response = await sequelize.transaction(async t => {
+      const response = await sequelize.transaction(async (t) => {
         const allProducts = await products.findAndCountAll(
           {
             offset,
@@ -20,18 +20,18 @@ module.exports = {
             include: [
               {
                 association: "Images",
-                attributes: ["id", "id_product", "image", "aspect_ratio"]
+                attributes: ["id", "id_product", "image", "aspect_ratio"],
               },
               {
                 association: "Brand",
-                attributes: ["id", "name"]
+                attributes: ["id", "name"],
               },
               {
                 association: "Categories",
                 attributes: ["id", "name"],
-                through: { attributes: [] }
-              }
-            ]
+                through: { attributes: [] },
+              },
+            ],
           },
           { transaction: t }
         );
@@ -50,7 +50,7 @@ module.exports = {
     const { id } = req.params;
 
     try {
-      const response = await sequelize.transaction(async t => {
+      const response = await sequelize.transaction(async (t) => {
         const product = await products.findByPk(
           id,
           {
@@ -58,18 +58,18 @@ module.exports = {
             include: [
               {
                 association: "Images",
-                attributes: ["id", "id_product", "image", "aspect_ratio"]
+                attributes: ["id", "id_product", "image", "aspect_ratio"],
               },
               {
                 association: "Brand",
-                attributes: ["id", "name"]
+                attributes: ["id", "name"],
               },
               {
                 association: "Categories",
                 attributes: ["id", "name"],
-                through: { attributes: [] }
-              }
-            ]
+                through: { attributes: [] },
+              },
+            ],
           },
           { transaction: t }
         );
@@ -91,7 +91,7 @@ module.exports = {
       price,
       status,
       categorie_id,
-      quantity
+      quantity,
     } = req.body;
 
     const findBrand = await brands.findByPk(brand_id);
@@ -108,14 +108,14 @@ module.exports = {
     }
 
     try {
-      const response = await sequelize.transaction(async t => {
+      const response = await sequelize.transaction(async (t) => {
         const productCreated = await products.create(
           {
             name,
             brand_id,
             description,
             price,
-            status
+            status,
           },
           { transaction: t }
         );
@@ -125,14 +125,14 @@ module.exports = {
           const [stockCreated] = await stock.findOrCreate({
             where: { id_product: productCreated.id },
             defaults: { quantity },
-            transaction: t
+            transaction: t,
           });
         }
 
         return productCreated;
       });
 
-      res.status(201).json(response.id);
+      res.status(201).json(response);
       return;
     } catch (err) {
       res.status(400).json({ error: "Unable to register this product." });
@@ -152,10 +152,10 @@ module.exports = {
 
     const imagesPath = await images
       .findAll({
-        where: { id_product: findProduct.id }
+        where: { id_product: findProduct.id },
       })
-      .then(url => {
-        const pathArr = url.reduce(function(prevVal, elem) {
+      .then((url) => {
+        const pathArr = url.reduce(function (prevVal, elem) {
           return [
             ...prevVal,
             {
@@ -166,19 +166,19 @@ module.exports = {
                 "..",
                 "uploads",
                 `${path.basename(elem.image)}`
-              )}`
-            }
+              )}`,
+            },
           ];
         }, []);
         return pathArr;
       });
 
     try {
-      await sequelize.transaction(async t => {
+      await sequelize.transaction(async (t) => {
         await products
           .destroy({
             where: { id: findProduct.id },
-            transaction: t
+            transaction: t,
           })
           .then(() => {
             imagesPath.map(async ({ path }) => {
@@ -217,20 +217,20 @@ module.exports = {
     }
 
     try {
-      const response = await sequelize.transaction(async t => {
+      const response = await sequelize.transaction(async (t) => {
         const [lines, updatedProduct] = await products.update(
           { name, description, price, status, brand_id },
           {
             where: { id },
             returning: true,
-            transaction: t
+            transaction: t,
           }
         );
 
         if (updatedProduct) {
           await findProduct.setCategories([]).then(async () => {
             await findProduct.addCategories(findCategorie, {
-              transaction: t
+              transaction: t,
             });
           });
         }
@@ -245,5 +245,5 @@ module.exports = {
       console.log(err);
       return;
     }
-  }
+  },
 };

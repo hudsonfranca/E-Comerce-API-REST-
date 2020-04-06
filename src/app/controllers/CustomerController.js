@@ -6,7 +6,7 @@ const bcrypt = require("bcrypt");
 module.exports = {
   async index(req, res) {
     const { offset, limit } = req.query;
-    const response = await sequelize.transaction(async t => {
+    const response = await sequelize.transaction(async (t) => {
       try {
         const findAllCustomer = await customers.findAndCountAll({
           offset,
@@ -22,7 +22,7 @@ module.exports = {
                 "email_address",
                 "cpf",
                 "phone_number",
-                "createdAt"
+                "createdAt",
               ],
               include: [
                 {
@@ -33,14 +33,14 @@ module.exports = {
                     "city",
                     "zip",
                     "country",
-                    "state"
-                  ]
-                }
-              ]
-            }
+                    "state",
+                  ],
+                },
+              ],
+            },
           ],
 
-          transaction: t
+          transaction: t,
         });
 
         return findAllCustomer;
@@ -53,7 +53,7 @@ module.exports = {
   },
   async show(req, res) {
     const { id } = req.params;
-    const response = await sequelize.transaction(async t => {
+    const response = await sequelize.transaction(async (t) => {
       try {
         const findCustomer = await customers.findByPk(id, {
           attributes: ["id"],
@@ -66,7 +66,7 @@ module.exports = {
                 "email_address",
                 "cpf",
                 "phone_number",
-                "createdAt"
+                "createdAt",
               ],
               include: [
                 {
@@ -77,14 +77,14 @@ module.exports = {
                     "city",
                     "zip",
                     "country",
-                    "state"
-                  ]
-                }
-              ]
-            }
+                    "state",
+                  ],
+                },
+              ],
+            },
           ],
 
-          transaction: t
+          transaction: t,
         });
 
         return findCustomer;
@@ -104,11 +104,11 @@ module.exports = {
       cpf,
       phone_number,
       password,
-      customerAddress
+      customerAddress,
     } = req.body;
 
     const findEmail = await users.findOne({
-      where: { email_address }
+      where: { email_address },
     });
 
     if (findEmail) {
@@ -117,7 +117,7 @@ module.exports = {
     }
 
     const customerCpf = await users.findOne({
-      where: { cpf }
+      where: { cpf },
     });
 
     if (customerCpf) {
@@ -126,7 +126,7 @@ module.exports = {
     }
 
     try {
-      const response = await sequelize.transaction(async t => {
+      const response = await sequelize.transaction(async (t) => {
         const createdUser = await users.create(
           {
             first_name,
@@ -134,7 +134,7 @@ module.exports = {
             email_address,
             cpf,
             phone_number,
-            password
+            password,
           },
           { transaction: t }
         );
@@ -142,7 +142,7 @@ module.exports = {
         if (createdUser) {
           await customers.create(
             {
-              id: createdUser.id
+              id: createdUser.id,
             },
             { transaction: t }
           );
@@ -150,12 +150,12 @@ module.exports = {
           createdUser.password = undefined;
 
           await createdUser.createAddresses(customerAddress, {
-            transaction: t
+            transaction: t,
           });
 
           return {
             user: createdUser,
-            access_token: createdUser.generateToken()
+            access_token: createdUser.generateToken(),
           };
         }
       });
@@ -177,19 +177,19 @@ module.exports = {
     }
 
     try {
-      const response = await sequelize.transaction(async t => {
+      const response = await sequelize.transaction(async (t) => {
         const deletedUser = await users.destroy({
           where: { id: findCustomer.id },
-          transaction: t
+          transaction: t,
         });
 
         if (deletedUser) {
           await addresses.destroy({
             where: {
               addressable_type: "users",
-              [Sequelize.Op.and]: { addressable_id: findCustomer.id }
+              [Sequelize.Op.and]: { addressable_id: findCustomer.id },
             },
-            transaction: t
+            transaction: t,
           });
         }
       });
@@ -227,13 +227,13 @@ module.exports = {
     }
 
     try {
-      const response = await sequelize.transaction(async t => {
+      const response = await sequelize.transaction(async (t) => {
         const [lines, updatedCustomer] = await users.update(
           dataWithHashPassword,
           {
             where: { id },
             returning: true,
-            transaction: t
+            transaction: t,
           }
         );
 
@@ -243,10 +243,10 @@ module.exports = {
           const [lines, updatedAddress] = await addresses.update(data, {
             where: {
               addressable_type: "users",
-              [Sequelize.Op.and]: { addressable_id: updatedCustomer[0].id }
+              [Sequelize.Op.and]: { addressable_id: updatedCustomer[0].id },
             },
             returning: true,
-            transaction: t
+            transaction: t,
           });
         }
         return updatedCustomer;
@@ -260,5 +260,5 @@ module.exports = {
       console.log(err);
       return;
     }
-  }
+  },
 };

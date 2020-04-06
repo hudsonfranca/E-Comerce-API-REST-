@@ -7,39 +7,39 @@ module.exports = {
   async index(req, res) {
     const { name, offset, limit } = req.query;
     try {
-      const response = await sequelize.transaction(async t => {
+      const response = await sequelize.transaction(async (t) => {
         const allProducts = await products.findAndCountAll(
           {
             offset,
             limit,
             where: {
               name: {
-                [Sequelize.Op.iLike]: `%${name}%`
-              }
+                [Sequelize.Op.iLike]: `%${name}%`,
+              },
             },
 
             attributes: ["id", "name", "description", "price", "status"],
             include: [
               {
                 association: "Images",
-                attributes: ["id", "id_product", "image", "aspect_ratio"]
+                attributes: ["id", "id_product", "image", "aspect_ratio"],
               },
               {
                 association: "Brand",
-                attributes: ["id", "name"]
+                attributes: ["id", "name"],
               },
 
               {
                 association: "Categories",
                 attributes: ["id", "name"],
-                through: { attributes: [] }
-              }
+                through: { attributes: [] },
+              },
             ],
-            distinct: true
+            distinct: true,
           },
           { transaction: t }
         );
-        console.log(allProducts.rows);
+
         return allProducts;
       });
 
@@ -49,5 +49,5 @@ module.exports = {
       console.log(err);
       return;
     }
-  }
+  },
 };

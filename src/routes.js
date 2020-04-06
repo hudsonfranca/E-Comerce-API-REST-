@@ -25,13 +25,6 @@ const upload = multer(uploadConfig);
 //...............CUSTOMERS ROUTES..............................
 routes.post("/api/customer", CustomerController.store);
 routes.get("/api/customer", CustomerController.index);
-routes.get("/api/customer/search", CustomerController.show);
-routes.delete("/api/customer/:id", CustomerController.delete);
-routes.put("/api/customer/:id/edit", CustomerController.update);
-
-//...............CUSTOMERS ROUTES..............................
-routes.post("/api/customer", CustomerController.store);
-routes.get("/api/customer", CustomerController.index);
 routes.get("/api/customer/:id/show", CustomerController.show);
 routes.delete("/api/customer/:id", CustomerController.delete);
 routes.put("/api/customer/:id/edit", CustomerController.update);
@@ -58,7 +51,7 @@ routes.get("/api/product/:id/images", ImageController.show);
 routes.post("/api/products", ProductController.store);
 routes.delete("/api/products/:id", ProductController.delete);
 routes.put("/api/products/:id/edit", ProductController.update);
-routes.get("/api/products/:offset/:limit", ProductController.index);
+routes.get("/api/products", ProductController.index);
 routes.get("/api/products/:id", ProductController.show);
 routes.get("/api/find/product", SearchProductController.index);
 
@@ -71,25 +64,28 @@ routes.put("/api/addresses/:id/edit", AddressesController.update);
 //...............BRAND ROUTES..............................
 routes.post("/api/brands", BrandController.store);
 routes.get("/api/brands", BrandController.index);
+routes.get("/api/brands/:id", BrandController.show);
 routes.delete("/api/brands/:id", BrandController.delete);
 routes.put("/api/brands/:id/edit", BrandController.update);
 
 //...............CATEGORIES ROUTES..............................
 routes.post("/api/categories", CategorieController.store);
 routes.get("/api/categories", CategorieController.index);
+routes.get("/api/categories/:id", CategorieController.show);
 routes.delete("/api/categories/:id", CategorieController.delete);
 routes.put("/api/categories/:id/edit", CategorieController.update);
 
 //...............STOCK ROUTES..............................
 routes.post("/api/product/:id/stock", StockController.store);
 routes.get("/api/product/:id/stock", StockController.show);
-routes.get("/api/stock/:offset/:limit", StockController.index);
+routes.get("/api/stock", StockController.index);
 routes.delete("/api/stock/:id", StockController.delete);
 routes.put("/api/stock/:id/edit", StockController.update);
 
 //...............PAYMENT METHODS..............................
 routes.post("/api/paymentMethods", PaymentMethodsController.store);
 routes.get("/api/paymentMethods", PaymentMethodsController.index);
+routes.get("/api/paymentMethods/:id", PaymentMethodsController.show);
 routes.delete("/api/paymentMethods/:id", PaymentMethodsController.delete);
 routes.put("/api/paymentMethods/:id/edit", PaymentMethodsController.update);
 

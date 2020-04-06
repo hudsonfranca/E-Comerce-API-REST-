@@ -4,10 +4,10 @@ const sequelize = require("../models").sequelize;
 module.exports = {
   async index(req, res) {
     try {
-      const response = await sequelize.transaction(async t => {
+      const response = await sequelize.transaction(async (t) => {
         const allBrands = await brands.findAll({
           attributes: ["id", "name"],
-          transaction: t
+          transaction: t,
         });
 
         return allBrands;
@@ -20,15 +20,34 @@ module.exports = {
       return;
     }
   },
+  async show(req, res) {
+    const { id } = req.params;
+    try {
+      const response = await sequelize.transaction(async (t) => {
+        const Brand = await brands.findByPk(id, {
+          attributes: ["id", "name"],
+          transaction: t,
+        });
+
+        return Brand;
+      });
+
+      return res.status(200).json(response);
+    } catch (err) {
+      res.status(400).json({ error: "Unable to display this brand." });
+      console.log(err);
+      return;
+    }
+  },
   async store(req, res) {
     const { name } = req.body;
 
     try {
-      const response = await sequelize.transaction(async t => {
+      const response = await sequelize.transaction(async (t) => {
         const [brandCreated] = await brands.findOrCreate({
           attributes: ["name"],
           where: { name },
-          transaction: t
+          transaction: t,
         });
 
         return brandCreated;
@@ -53,10 +72,10 @@ module.exports = {
     }
 
     try {
-      await sequelize.transaction(async t => {
+      await sequelize.transaction(async (t) => {
         await brands.destroy({
           where: { id: findBrand.id },
-          transaction: t
+          transaction: t,
         });
       });
 
@@ -79,11 +98,11 @@ module.exports = {
     }
 
     try {
-      const response = await sequelize.transaction(async t => {
+      const response = await sequelize.transaction(async (t) => {
         const [lines, updatedBrand] = await brands.update(req.body, {
           where: { id },
           returning: true,
-          transaction: t
+          transaction: t,
         });
 
         return updatedBrand;
@@ -97,5 +116,5 @@ module.exports = {
       console.log(err);
       return;
     }
-  }
+  },
 };

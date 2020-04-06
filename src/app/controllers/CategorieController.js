@@ -4,10 +4,10 @@ const sequelize = require("../models").sequelize;
 module.exports = {
   async index(req, res) {
     try {
-      const response = await sequelize.transaction(async t => {
+      const response = await sequelize.transaction(async (t) => {
         const allCategories = await categories.findAll({
           attributes: ["id", "name"],
-          transaction: t
+          transaction: t,
         });
 
         return allCategories;
@@ -21,15 +21,35 @@ module.exports = {
       return;
     }
   },
+  async show(req, res) {
+    const { id } = req.params;
+    try {
+      const response = await sequelize.transaction(async (t) => {
+        const Categorie = await categories.findByPk(id, {
+          attributes: ["id", "name"],
+          transaction: t,
+        });
+
+        return Categorie;
+      });
+
+      res.status(200).json(response);
+      return;
+    } catch (err) {
+      res.status(400).json({ error: "Unable to display this categorie." });
+      console.log(err);
+      return;
+    }
+  },
   async store(req, res) {
     const { name } = req.body;
 
     try {
-      const response = await sequelize.transaction(async t => {
+      const response = await sequelize.transaction(async (t) => {
         const [categorieCreated] = await categories.findOrCreate({
           attributes: ["name"],
           where: { name },
-          transaction: t
+          transaction: t,
         });
 
         return categorieCreated;
@@ -54,10 +74,10 @@ module.exports = {
     }
 
     try {
-      await sequelize.transaction(async t => {
+      await sequelize.transaction(async (t) => {
         await categories.destroy({
           where: { id },
-          transaction: t
+          transaction: t,
         });
       });
 
@@ -80,11 +100,11 @@ module.exports = {
     }
 
     try {
-      const response = await sequelize.transaction(async t => {
+      const response = await sequelize.transaction(async (t) => {
         const [lines, updatedCategorie] = await categories.update(req.body, {
           where: { id },
           returning: true,
-          transaction: t
+          transaction: t,
         });
 
         return updatedCategorie;
@@ -98,5 +118,5 @@ module.exports = {
       console.log(err);
       return;
     }
-  }
+  },
 };

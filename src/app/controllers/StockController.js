@@ -7,7 +7,7 @@ module.exports = {
     const { id } = req.params;
 
     try {
-      const response = await sequelize.transaction(async t => {
+      const response = await sequelize.transaction(async (t) => {
         const findStock = await products.findOne(
           {
             where: { id },
@@ -15,9 +15,9 @@ module.exports = {
             include: [
               {
                 association: "Stock",
-                attributes: ["id", "quantity", "id_product"]
-              }
-            ]
+                attributes: ["id", "quantity", "id_product"],
+              },
+            ],
           },
           { transaction: t }
         );
@@ -33,9 +33,9 @@ module.exports = {
     }
   },
   async index(req, res) {
-    const { offset, limit } = req.params;
+    const { offset, limit } = req.query;
     try {
-      const response = await sequelize.transaction(async t => {
+      const response = await sequelize.transaction(async (t) => {
         const allstock = await products.findAndCountAll(
           {
             offset,
@@ -45,9 +45,9 @@ module.exports = {
             include: [
               {
                 association: "Stock",
-                attributes: ["id", "quantity", "id_product"]
-              }
-            ]
+                attributes: ["id", "quantity", "id_product"],
+              },
+            ],
           },
           { transaction: t }
         );
@@ -74,11 +74,11 @@ module.exports = {
     }
 
     try {
-      const response = await sequelize.transaction(async t => {
+      const response = await sequelize.transaction(async (t) => {
         const [stockCreated] = await stock.findOrCreate({
           where: { id_product: findProduct.id },
           defaults: { quantity },
-          transaction: t
+          transaction: t,
         });
 
         if (stockCreated) {
@@ -86,7 +86,7 @@ module.exports = {
             { status: true },
             {
               where: { id: findProduct.id },
-              transaction: t
+              transaction: t,
             }
           );
         }
@@ -113,10 +113,10 @@ module.exports = {
     }
 
     try {
-      await sequelize.transaction(async t => {
+      await sequelize.transaction(async (t) => {
         await stock.destroy({
           where: { id },
-          transaction: t
+          transaction: t,
         });
       });
 
@@ -139,11 +139,11 @@ module.exports = {
     }
 
     try {
-      const response = await sequelize.transaction(async t => {
+      const response = await sequelize.transaction(async (t) => {
         const [lines, updatedStock] = await stock.update(req.body, {
           where: { id: findStock.id },
           returning: true,
-          transaction: t
+          transaction: t,
         });
 
         return updatedStock;
@@ -157,5 +157,5 @@ module.exports = {
       console.log(err);
       return;
     }
-  }
+  },
 };
