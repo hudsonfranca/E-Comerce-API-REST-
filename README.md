@@ -40,13 +40,27 @@ yarn istall
 - [Create a new payment method](#create-a-new-payment-method)
 - [Delete a payment method](#delete-a-payment-method)
 - [Edit payment method](#edit-payment-method)
-- [Get the list of products that are in the customer's cart.](#get-the-list-of-products-that-are-in-the-customer's-cart.)
+- [Get the list of products that are in the customer's cart](#get-the-list-of-products-that-are-in-the-customer's-cart)
 - [Add products to the customer's cart](#add-products-to-the-customer's-cart)
 - [Delete a product from the customer's cart](#delete-a-product-from-the-customer's-cart)
 - [Edit the quantity of a product in the cart](#edit-the-quantity-of-a-product-in-the-cart)
 - [Add a product to your favorites list](#add-a-product-to-your-favorites-list)
 - [Get the customer's favorite product list](#get-the-customer's-favorite-product-list)
 - [Create a order](#create-a-order)
+- [Get list of orders for each customer](#get-list-of-orders-for-each-customer)
+- [Get list of orders](#get-list-of-orders)
+- [Delete a order](#delete-a-order)
+- [Get a specific order](#get-a-specific-order)
+- [Get order count by status](#get-order-count-by-status)
+- [Update order status](#update-order-status)
+- [Get all images of a product](#get-all-images-of-a-product)
+- [Add an image to a product](#add-an-image-to-a-product)
+- [Delete a image](#delete-a-image)
+- [Create a admin](#create-a-admin)
+- [Get list of admins](#get-list-of-admins)
+- [Get a specific admin](#get-a-specific-admin)
+- [Edit admin data](#edit-admin-data)
+- [Delete a admin](#delete-a-admin)
 
 ## Create a session
 
@@ -837,7 +851,7 @@ yarn istall
 
 ---
 
-## Get the list of products that are in the customer's cart.
+## Get the list of products that are in the customer's cart
 
     You will need a token to access each customer's cart, create a session or a new customer to get a token.
 
@@ -880,7 +894,7 @@ yarn istall
         }
     ]
 
-## Add products to the customer's cart.
+## Add products to the customer's cart
 
     You will need a token to add products to a specific customer's cart, create a session or a new customer to get a token.
 
@@ -1017,7 +1031,7 @@ yarn istall
 
 ## Create a order
 
-    To create a new order you will need to add products to the cart and you will also need a token.
+    To create an order you will need to add products to the cart,create a form of payment and you will also need a token.  create a session or a new customer to get a token.
 
 ### Request
 
@@ -1031,6 +1045,18 @@ yarn istall
 
 `BODY`
 
+     {
+          id_payment_methods: 1,
+          status: "On hold",
+          orderAddress: {
+            "street_address":"25 Darwin Street",
+            "city":"New York",
+            "zip":"12665",
+            "country":"United states",
+            "state":"NY"
+          }
+    }
+
 ### Response
 
      Status: 200
@@ -1038,3 +1064,512 @@ yarn istall
     {
         "ok": true
     }
+
+## Get list of orders for each customer
+
+    To obtain the list of orders for each customer, you will need a token. Create a session or a new customer to get a token.
+
+### Request
+
+`GET /api/orders`
+
+    http://localhost:3333/api/orders
+
+`HEADER`
+
+    header =>  authorization, value => Bearer <Your token>
+
+### Response
+
+    [
+        {
+            "id": 4,
+            "id_customers": 6,
+            "id_payment_methods": 6,
+            "status": "On hold",
+            "amount": "31990.00",
+            "created_at": "2020-04-06T02:36:07.950Z",
+            "Products": [
+            {
+                "id": 1,
+                "name": "Notebook Acer Aspire 5 A515-52-56A8 Intel® Core™ i5-8265U 8ªGeração RAM de 8GB SSD de 128 GB HD de 1TB Tela de 15.6 Windows 10",
+                "description": "Aspire 5 A515-52-56A8Sistema OperacionalWindows 10 Home 64 bitsCPU e chipsetIntel® Core™ i5-8265U 8ª geração Quad CoreFrequência: 1,6 GHz a 3,9 GHz (turbo max)6 MB de SmartCacheMemória RAM8 GB (1x8GB) DDR4Até 2400 MHzExpansível a 32...",
+                "price": "3199.00",
+                "status": true,
+                "Images": [
+                {
+                    "image": "http://localhost:3333/files/2-1585778328129.jpg",
+                    "id": 2,
+                    "id_product": 1,
+                    "aspect_ratio": "1.9"
+                },
+                {
+                    "image": "http://localhost:3333/files/1-1585778319566.jpg",
+                    "id": 1,
+                    "id_product": 1,
+                    "aspect_ratio": "1.9"
+                }
+                ],
+                "orders_products": {
+                "quantity": 10
+                }
+            }
+            ],
+            "OrdersAddresse": {
+            "id": 9,
+            "street_address": "25 Darwin Street",
+            "city": "New York",
+            "zip": "12665",
+            "country": "United states",
+            "state": "NY"
+            },
+            "Customers": {
+            "id": 6,
+            "User": {
+                "id": 6,
+                "first_name": "Michael",
+                "last_name": "Jackson",
+                "email_address": "michael@gmail.com"
+            }
+            }
+        }
+    ]
+
+## Get list of orders
+
+    To obtain the list of orders you will need a token. Create a session or a new customer to get a token.
+
+### Request
+
+`GET /api/orders/index?offset=<Your offset>&limit=<Your limit>`
+
+    http://localhost:3333/api/orders/index?offset=0&limit=10
+
+`HEADER`
+
+    header =>  authorization, value => Bearer <Your token>
+
+### Response
+
+    {
+        "count": 1,
+        "rows": [
+            {
+            "id": 1,
+            "id_customers": 2,
+            "id_payment_methods": 3,
+            "status": "Completed",
+            "amount": "6398.00",
+            "created_at": "2020-04-01T23:43:03.243Z",
+            "Products": [
+                {
+                "id": 1,
+                "name": "Notebook Acer Aspire 5 A515-52-56A8 Intel® Core™ i5-8265U 8ªGeração RAM de 8GB SSD de 128 GB HD de 1TB Tela de 15.6 Windows 10",
+                "description": "Aspire 5 A515-52-56A8Sistema OperacionalWindows 10 Home 64 bitsCPU e chipsetIntel® Core™ i5-8265U 8ª geração Quad CoreFrequência: 1,6 GHz a 3,9 GHz (turbo max)6 MB de SmartCacheMemória RAM8 GB (1x8GB) DDR4Até 2400 MHzExpansível a 32...",
+                "price": "3199.00",
+                "status": true,
+                "Images": [
+                    {
+                    "image": "http://localhost:3333/files/2-1585778328129.jpg",
+                    "id": 2,
+                    "id_product": 1,
+                    "aspect_ratio": "1.9"
+                    },
+                    {
+                    "image": "http://localhost:3333/files/1-1585778319566.jpg",
+                    "id": 1,
+                    "id_product": 1,
+                    "aspect_ratio": "1.9"
+                    }
+                ],
+                "orders_products": {
+                    "quantity": 2
+                }
+                }
+            ],
+            "OrdersAddresse": {
+                "id": 5,
+                "street_address": "Rua A n°28 Boa Vista",
+                "city": "Linhares",
+                "zip": "7897",
+                "country": "Brasil",
+                "state": "ES"
+            },
+            "Customers": {
+                "id": 2,
+                "User": {
+                "id": 2,
+                "first_name": "Hudson",
+                "last_name": "Silvares França Gama",
+                "email_address": "hudson@gmail.com"
+                }
+            }
+            }
+        ]
+    }
+
+## Delete a order
+
+### Request
+
+`DELETE /api/orders/:id`
+
+    http://localhost:3333/api/orders/4
+
+### Response
+
+    Status: 200
+
+## Get a specific order
+
+`GET /api/orders/:id/show`
+
+    http://localhost:3333/api/orders/1/show
+
+### Response
+
+        {
+            "id": 1,
+            "id_customers": 2,
+            "id_payment_methods": 3,
+            "status": "Completed",
+            "amount": "6398.00",
+            "created_at": "2020-04-01T23:43:03.243Z",
+            "Products": [
+                {
+                "id": 1,
+                "name": "Notebook Acer Aspire 5 A515-52-56A8 Intel® Core™ i5-8265U 8ªGeração RAM de 8GB SSD de 128 GB HD de 1TB Tela de 15.6 Windows 10",
+                "description": "Aspire 5 A515-52-56A8Sistema OperacionalWindows 10 Home 64 bitsCPU e chipsetIntel® Core™ i5-8265U 8ª geração Quad CoreFrequência: 1,6 GHz a 3,9 GHz (turbo max)6 MB de SmartCacheMemória RAM8 GB (1x8GB) DDR4Até 2400 MHzExpansível a 32...",
+                "price": "3199.00",
+                "status": true,
+                "orders_products": {
+                    "quantity": 2
+                }
+                }
+            ],
+            "OrdersAddresse": {
+                "id": 5,
+                "street_address": "Rua A n°28 Boa Vista",
+                "city": "Linhares",
+                "zip": "7897",
+                "country": "Brasil",
+                "state": "ES"
+            },
+            "Customers": {
+                "id": 2,
+                "User": {
+                "id": 2,
+                "first_name": "Hudson",
+                "last_name": "Silvares França Gama",
+                "email_address": "hudson@gmail.com"
+                }
+            }
+        }
+
+## Get order count by status
+
+`GET /api/orders/status/:name`
+
+    http://localhost:3333/api/orders/status/Completed
+
+### Response
+
+    {
+        "count": 1,
+        "rows": [
+            {
+            "id": 1,
+            "id_customers": 2,
+            "id_payment_methods": 3,
+            "status": "Completed",
+            "amount": "6398.00",
+            "created_at": "2020-04-01T23:43:03.243Z",
+            "Products": [
+                {
+                "id": 1,
+                "name": "Notebook Acer Aspire 5 A515-52-56A8 Intel® Core™ i5-8265U 8ªGeração RAM de 8GB SSD de 128 GB HD de 1TB Tela de 15.6 Windows 10",
+                "description": "Aspire 5 A515-52-56A8Sistema OperacionalWindows 10 Home 64 bitsCPU e chipsetIntel® Core™ i5-8265U 8ª geração Quad CoreFrequência: 1,6 GHz a 3,9 GHz (turbo max)6 MB de SmartCacheMemória RAM8 GB (1x8GB) DDR4Até 2400 MHzExpansível a 32...",
+                "price": "3199.00",
+                "status": true,
+                "orders_products": {
+                    "quantity": 2
+                }
+                }
+            ],
+            "OrdersAddresse": {
+                "id": 5,
+                "street_address": "Rua A n°28 Boa Vista",
+                "city": "Linhares",
+                "zip": "7897",
+                "country": "Brasil",
+                "state": "ES"
+            },
+            "Customers": {
+                "id": 2,
+                "User": {
+                "id": 2,
+                "first_name": "Hudson",
+                "last_name": "Silvares França Gama",
+                "email_address": "hudson@gmail.com"
+                }
+            }
+            }
+        ]
+    }
+
+## Update order status
+
+### Request
+
+`PUT /api/order/:id/edit`
+
+    http://localhost:3333/api/order/1/edit
+
+`BODY`
+
+    {
+        "status":"On hold"
+    }
+
+### Response
+
+    [
+        {
+            "id": 1,
+            "id_customers": 2,
+            "id_payment_methods": 3,
+            "amount": "6398.00",
+            "status": "On hold",
+            "createdAt": "2020-04-01T23:43:03.243Z",
+            "updatedAt": "2020-04-07T00:05:03.175Z"
+        }
+    ]
+
+---
+
+## Get all images of a product
+
+`GET /api/product/:id/images`
+
+`:id => product id`
+
+    http://localhost:3333/api/product/1/images
+
+### Response
+
+    [
+        {
+            "image": "http://localhost:3333/files/1-1585778319566.jpg",
+            "id": 1,
+            "id_product": 1,
+            "aspect_ratio": "1.9"
+        },
+        {
+            "image": "http://localhost:3333/files/2-1585778328129.jpg",
+            "id": 2,
+            "id_product": 1,
+            "aspect_ratio": "1.9"
+        }
+    ]
+
+## Add an image to a product
+
+    Add one image at a time.
+
+`GET /api/product/:id/images/:aspect_ratio`
+
+`:id => Product id`
+
+```javascript
+const imageFormData = new FormData();
+
+//imageFile => Your image
+imageFormData.append("image", imageFile);
+
+await api.post(`/api/product/1/images/1.2`, imageFormData);
+```
+
+### Response
+
+    {
+        "image": "http://localhost:3333/files/bike-1585883570365.jpg",
+        "id": 7,
+        "id_product": 1,
+        "aspect_ratio": "1.9",
+        "updatedAt": "2020-04-03T03:12:50.462Z",
+        "createdAt": "2020-04-03T03:12:50.462Z"
+    }
+
+## Delete a image
+
+### Request
+
+`DELETE /api/images/:id`
+
+    http://localhost:3333/api/images/7
+
+### Response
+
+    Status: 200
+
+---
+
+## Create a admin
+
+### Request
+
+`POST /api/admin`
+
+    http://localhost:3333/api/admin
+
+`BODY`
+
+    {
+        "first_name":"Steve",
+        "last_name":"Jobs",
+        "email_address":"stevejobs@gmail.com",
+        "password":"12345678",
+        "phone_number":"89816543301",
+        "cpf":"01345001033",
+        "adminAddress":{
+            "street_address":"25 Darwin Street",
+            "city":"New York",
+            "zip":"12665",
+            "country":"United states",
+            "state":"NY"
+        },
+        "type":"Boss"
+    }
+
+### Response
+
+     {
+        "user": {
+            "id": 8,
+            "first_name": "Steve",
+            "last_name": "Jobs",
+            "email_address": "stevejobs@gmail.com",
+            "cpf": "01345001033",
+            "phone_number": "89816543301",
+            "updatedAt": "2020-04-07T23:31:06.588Z",
+            "createdAt": "2020-04-07T23:31:06.588Z"
+        },
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwiaWF0IjoxNTg2MzAyMjc1LCJleHAiOjE1ODYzODg2NzV9.9DY_zxKvaPxNT3VCfzzrURFciHPAdNT6QmjL3-AF0kg"
+     }
+
+## Get list of admins
+
+### Request
+
+`GET /api/admin`
+
+    http://localhost:3333/api/admin
+
+### Response
+
+    [
+        {
+            "id": 8,
+            "type": "Boss",
+            "User": {
+            "first_name": "Steve",
+            "last_name": "Jobs",
+            "email_address": "stevejobs@gmail.com",
+            "cpf": "01345001033",
+            "phone_number": "89816543301",
+            "createdAt": "2020-04-07T23:31:06.588Z",
+            "Addresses": {
+                "street_address": "25 Darwin Street",
+                "city": "New York",
+                "zip": "12665",
+                "country": "United states",
+                "state": "NY"
+            }
+            }
+        }
+    ]
+
+## Get a specific admin
+
+### Request
+
+`GET /api/admin/:id`
+
+    http://localhost:3333/api/admin/8
+
+### Response
+
+    {
+        "id": 8,
+        "type": "Boss",
+        "User": {
+            "first_name": "Steve",
+            "last_name": "Jobs",
+            "email_address": "stevejobs@gmail.com",
+            "cpf": "01345001033",
+            "phone_number": "89816543301",
+            "createdAt": "2020-04-07T23:31:06.588Z",
+            "Addresses": {
+            "street_address": "25 Darwin Street",
+            "city": "New York",
+            "zip": "12665",
+            "country": "United states",
+            "state": "NY"
+            }
+        }
+    }
+
+## Edit admin data
+
+### Request
+
+`PUT /api/admin/:id/edit`
+
+    http://localhost:3333/api/admin/8/edit
+
+`BODY`
+
+    {
+        "first_name":"Hudson 2",
+        "last_name":"Jobs",
+        "email_address":"stevejobs0@gmail.com",
+        "password":"12345678",
+        "phone_number":"89816543301",
+        "cpf": "01345001039",
+        "street_address":"25 Darwin Street",
+        "city":"RIO",
+        "zip":"12665",
+        "country":"United states",
+        "state":"NY",
+        "type":"Employe"
+
+    }
+
+### Response
+
+    [
+        {
+            "id": 8,
+            "first_name": "Hudson 2",
+            "last_name": "Jobs",
+            "cpf": "01345001033",
+            "email_address": "stevejobs1@gmail.com",
+            "phone_number": "89816543301",
+            "createdAt": "2020-04-07T23:31:06.588Z",
+            "updatedAt": "2020-04-08T00:08:54.196Z"
+        }
+    ]
+
+## Delete a admin
+
+### Request
+
+`DELETE /api/admin/:id`
+
+    http://localhost:3333/api/admin/7
+
+### Response
+
+### Response
+
+    Status: 200

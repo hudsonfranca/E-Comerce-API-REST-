@@ -1,11 +1,11 @@
-const { admins, users } = require("../models");
+const { admins, users, addresses } = require("../models");
 const sequelize = require("../models").sequelize;
 const Sequelize = require("../models").Sequelize;
 const bcrypt = require("bcrypt");
 
 module.exports = {
   async index(req, res) {
-    const response = await sequelize.transaction(async t => {
+    const response = await sequelize.transaction(async (t) => {
       try {
         const findAllAdmins = await admins.findAll({
           attributes: ["id", "type"],
@@ -18,7 +18,7 @@ module.exports = {
                 "email_address",
                 "cpf",
                 "phone_number",
-                "createdAt"
+                "createdAt",
               ],
               include: [
                 {
@@ -28,14 +28,14 @@ module.exports = {
                     "city",
                     "zip",
                     "country",
-                    "state"
-                  ]
-                }
-              ]
-            }
+                    "state",
+                  ],
+                },
+              ],
+            },
           ],
 
-          transaction: t
+          transaction: t,
         });
 
         return findAllAdmins;
@@ -48,7 +48,7 @@ module.exports = {
   },
   async show(req, res) {
     const { id } = req.params;
-    const response = await sequelize.transaction(async t => {
+    const response = await sequelize.transaction(async (t) => {
       try {
         const findAdmins = await admins.findByPk(id, {
           attributes: ["id", "type"],
@@ -61,7 +61,7 @@ module.exports = {
                 "email_address",
                 "cpf",
                 "phone_number",
-                "createdAt"
+                "createdAt",
               ],
               include: [
                 {
@@ -71,14 +71,14 @@ module.exports = {
                     "city",
                     "zip",
                     "country",
-                    "state"
-                  ]
-                }
-              ]
-            }
+                    "state",
+                  ],
+                },
+              ],
+            },
           ],
 
-          transaction: t
+          transaction: t,
         });
 
         return findAdmins;
@@ -99,11 +99,11 @@ module.exports = {
       phone_number,
       password,
       adminAddress,
-      type
+      type,
     } = req.body;
 
     const findEmail = await users.findOne({
-      where: { email_address }
+      where: { email_address },
     });
 
     if (findEmail) {
@@ -112,7 +112,7 @@ module.exports = {
     }
 
     const adminCpf = await users.findOne({
-      where: { cpf }
+      where: { cpf },
     });
 
     if (adminCpf) {
@@ -121,7 +121,7 @@ module.exports = {
     }
 
     try {
-      const response = await sequelize.transaction(async t => {
+      const response = await sequelize.transaction(async (t) => {
         const createdAdmin = await users.create(
           {
             first_name,
@@ -129,7 +129,7 @@ module.exports = {
             email_address,
             cpf,
             phone_number,
-            password
+            password,
           },
           { transaction: t }
         );
@@ -138,7 +138,7 @@ module.exports = {
           await admins.create(
             {
               id: createdAdmin.id,
-              type
+              type,
             },
             { transaction: t }
           );
@@ -149,7 +149,7 @@ module.exports = {
 
           return {
             user: createdAdmin,
-            access_token: createdAdmin.generateToken()
+            access_token: createdAdmin.generateToken(),
           };
         }
       });
@@ -171,10 +171,10 @@ module.exports = {
     }
 
     try {
-      const response = await sequelize.transaction(async t => {
+      const response = await sequelize.transaction(async (t) => {
         await users.destroy({
           where: { id: findAdmin.id },
-          transaction: t
+          transaction: t,
         });
       });
 
@@ -190,9 +190,28 @@ module.exports = {
 
   async update(req, res) {
     const { id } = req.params;
+    const data = req.body;
 
     async function hashPassword() {
       let data = req.body;
+
+      const { email_address, cpf } = req.body;
+
+      const findEmail = await users.findOne({
+        where: { email_address, id: { [Sequelize.Op.ne]: id } },
+      });
+
+      if (findEmail) {
+        return res.status(400).json({ error: "Choose another email." });
+      }
+
+      const customerCpf = await users.findOne({
+        where: { cpf, id: { [Sequelize.Op.ne]: id } },
+      });
+
+      if (customerCpf) {
+        return res.status(400).json({ error: "Choose another cpf." });
+      }
 
       const hash = await bcrypt.hash(req.body.password, 16);
 
@@ -211,11 +230,11 @@ module.exports = {
     }
 
     try {
-      const response = await sequelize.transaction(async t => {
+      const response = await sequelize.transaction(async (t) => {
         const [lines, updatedUser] = await users.update(dataWithHashPassword, {
           where: { id },
           returning: true,
-          transaction: t
+          transaction: t,
         });
 
         const [linesAdmin, updatedAdmin] = await admins.update(
@@ -223,9 +242,22 @@ module.exports = {
           {
             where: { id },
             returning: true,
-            transaction: t
+            transaction: t,
           }
         );
+
+        updatedUser[0].password = undefined;
+
+        if (updatedAdmin) {
+          const [lines, updatedAddress] = await addresses.update(data, {
+            where: {
+              addressable_type: "users",
+              [Sequelize.Op.and]: { addressable_id: updatedAdmin[0].id },
+            },
+            returning: true,
+            transaction: t,
+          });
+        }
 
         return updatedUser;
       });
@@ -238,5 +270,5 @@ module.exports = {
       console.log(err);
       return;
     }
-  }
+  },
 };

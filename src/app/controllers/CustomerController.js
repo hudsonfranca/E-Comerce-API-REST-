@@ -207,6 +207,27 @@ module.exports = {
   async update(req, res) {
     const { id } = req.params;
     const data = req.body;
+
+    const { email_address, cpf } = req.body;
+
+    const findEmail = await users.findOne({
+      where: { email_address, id: { [Sequelize.Op.ne]: id } },
+    });
+
+    if (findEmail) {
+      res.status(400).json({ error: "Choose another email." });
+      return;
+    }
+
+    const customerCpf = await users.findOne({
+      where: { cpf, id: { [Sequelize.Op.ne]: id } },
+    });
+
+    if (customerCpf) {
+      res.status(400).json({ error: "Choose another cpf." });
+      return;
+    }
+
     async function hashPassword() {
       let data = req.body;
 

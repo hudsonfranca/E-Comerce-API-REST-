@@ -14,7 +14,7 @@ const FavoritesController = require("./app/controllers/FavoritesController");
 const OrderController = require("./app/controllers/OrderController");
 const OrderByStatusController = require("./app/controllers/OrderByStatusController");
 const ImageController = require("./app/controllers/ImageController");
-const OrdersPageController = require("./app/controllers/OrdersPageController");
+const OrdersByUserController = require("./app/controllers/OrdersByUserController");
 const authMiddleware = require("./app/middleware/auth");
 
 const multer = require("multer");
@@ -113,6 +113,7 @@ routes.delete(
 
 //...............ORDERS ROUTES..............................
 routes.post("/api/orders", authMiddleware, OrderController.store);
+routes.get("/api/orders", authMiddleware, OrdersByUserController.show);
 routes.get("/api/orders/index", OrderController.index);
 routes.delete("/api/orders/:id", OrderController.delete);
 routes.get("/api/orders/:id/show", OrderController.show);
