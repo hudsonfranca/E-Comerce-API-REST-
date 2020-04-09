@@ -1,10 +1,34 @@
-# This readme is not yet finished.
+# Example of a REST API for an E-Comerce
 
-# E-comerce REST API
+This project was created with the purpose of studying node.js with a relational database.
 
-## Install
+## Getting Started
 
-yarn istall
+### Prerequisites
+
+```
+PostgreSQL
+```
+
+### Installing
+
+```
+yarn install
+```
+
+    Edit the .env file with your database connection parameters.
+
+```
+yarn sequelize db:create
+```
+
+```
+npx sequelize-cli db:migrate
+```
+
+```
+sequelize db:seed:all
+```
 
 ## URLs
 
@@ -40,9 +64,9 @@ yarn istall
 - [Create a new payment method](#create-a-new-payment-method)
 - [Delete a payment method](#delete-a-payment-method)
 - [Edit payment method](#edit-payment-method)
-- [Get the list of products that are in the customer's cart](#get-the-list-of-products-that-are-in-the-customer's-cart)
-- [Add products to the customer's cart](#add-products-to-the-customer's-cart)
-- [Delete a product from the customer's cart](#delete-a-product-from-the-customer's-cart)
+- [Get the list of products that are in the cart](#get-the-list-of-products-that-are-in-the-cart)
+- [Add products to cart](#add-products-to-cart)
+- [Delete a product from the cart](#delete-a-product-from-the-cart)
 - [Edit the quantity of a product in the cart](#edit-the-quantity-of-a-product-in-the-cart)
 - [Add a product to your favorites list](#add-a-product-to-your-favorites-list)
 - [Get the customer's favorite product list](#get-the-customer's-favorite-product-list)
@@ -851,7 +875,7 @@ yarn istall
 
 ---
 
-## Get the list of products that are in the customer's cart
+## Get the list of products that are in the cart
 
     You will need a token to access each customer's cart, create a session or a new customer to get a token.
 
@@ -894,7 +918,7 @@ yarn istall
         }
     ]
 
-## Add products to the customer's cart
+## Add products to cart
 
     You will need a token to add products to a specific customer's cart, create a session or a new customer to get a token.
 
@@ -917,7 +941,7 @@ yarn istall
         "createdAt": "2020-04-06T00:15:01.819Z"
     }
 
-## Delete a product from the customer's cart
+## Delete a product from the cart
 
     You will need a token to delete a product from a cart, create a session or a new customer to get a token.
 

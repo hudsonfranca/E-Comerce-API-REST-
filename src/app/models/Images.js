@@ -3,27 +3,27 @@ module.exports = (sequelize, DataTypes) => {
     image: {
       type: DataTypes.STRING,
       allowNull: false,
-      get: function() {
-        return "http://localhost:3333/files/" + this.getDataValue("image");
+      get: function () {
+        return ` ${process.env.BASE_URL}/files/${this.getDataValue("image")}`;
       },
       validate: {
         notNull: true,
-        notEmpty: true
-      }
+        notEmpty: true,
+      },
     },
     aspect_ratio: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
         notNull: true,
-        notEmpty: true
-      }
-    }
+        notEmpty: true,
+      },
+    },
   });
-  images.associate = function(models) {
+  images.associate = function (models) {
     images.belongsTo(models.products, {
       foreignKey: "id_product",
-      as: "products"
+      as: "products",
     });
   };
 
