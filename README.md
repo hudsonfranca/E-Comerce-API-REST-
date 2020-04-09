@@ -1065,7 +1065,7 @@ Runs the app in the development mode.
 
 ## Create a order
 
-    To create an order you will need to add products to the cart,create a form of payment and you will also need a token.  create a session or a new customer to get a token.
+    To create an order, you will need to add products to the cart, create a payment method and you will also need a token. create a session or a new client to obtain a token.
 
 ### Request
 
