@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
       get: function () {
-        return ` ${process.env.BASE_URL}/files/${this.getDataValue("image")}`;
+        return `${process.env.BASE_URL}/files/${this.getDataValue("image")}`;
       },
       validate: {
         notNull: true,

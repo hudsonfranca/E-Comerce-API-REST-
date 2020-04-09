@@ -30,6 +30,16 @@ npx sequelize-cli db:migrate
 sequelize db:seed:all
 ```
 
+### Available Scripts
+
+### `yarn start`
+
+Runs the app.
+
+### `yarn dev`
+
+Runs the app in the development mode.
+
 ## URLs
 
 - [Create a session](#create-a-session)
