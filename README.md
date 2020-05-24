@@ -1,8 +1,6 @@
-# Example of a REST API for an E-Comerce
+# A Rest Api for an E-Commerce made in Node.js
 
-This project was created with the purpose of studying node.js with a relational database.
-
-## Getting Started
+This Rest Api was built in Node.js and uses PostgreSQL as its database.
 
 ### Prerequisites
 
@@ -10,7 +8,13 @@ This project was created with the purpose of studying node.js with a relational 
 PostgreSQL
 ```
 
-### Installing
+## How to use
+
+Clone the application.
+
+```bash
+https://github.com/hudsonfranca/E-Comerce-API-REST-.git
+```
 
 ```
 yarn install
@@ -40,7 +44,7 @@ Runs the app.
 
 Runs the app in the development mode.
 
-## URLs
+## ENDPOINTS
 
 - [Create a session](#create-a-session)
 - [Get list of customers](#get-list-of-customers)
