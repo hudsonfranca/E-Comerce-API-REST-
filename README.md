@@ -16,20 +16,25 @@ Clone the application.
 https://github.com/hudsonfranca/E-Comerce-API-REST-.git
 ```
 
+Install dependencies
 ```
 yarn install
 ```
 
-    Edit the .env file with your database connection parameters.
+Edit the .env file with your database connection parameters.
 
+
+Create the database
 ```
 yarn sequelize db:create
 ```
 
+Create the database tables
 ```
 npx sequelize-cli db:migrate
 ```
 
+Add some initial data for Rest Api to work correctly.
 ```
 sequelize db:seed:all
 ```
