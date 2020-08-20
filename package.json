@@ -5,7 +5,7 @@
   "license": "MIT",
   "dependencies": {
     "@hapi/joi": "^17.1.0",
-    "bcrypt": "3.0.6",
+    "bcrypt": "5.0.0",
     "cors": "^2.8.5",
     "decimal.js": "^10.2.0",
     "dotenv": "^8.2.0",
